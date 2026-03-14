@@ -4,3 +4,4 @@ pydirectinput==1.0.4
 pyautogui==0.9.54
 PyYAML==6.0.3
 keyboard==0.13.5
+pyinstaller==6.19.0
