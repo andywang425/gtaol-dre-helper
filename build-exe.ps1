@@ -26,17 +26,17 @@ if (Test-Path "dist") {
     Write-Host "Cleaning dist folder..."
 
     Get-ChildItem -Path "dist" -Directory |
-        Where-Object { $_.Name -ine "tesseract" } |
-        Remove-Item -Recurse -Force
+    Where-Object { $_.Name -ine "tesseract" } |
+    Remove-Item -Recurse -Force
 
     Get-ChildItem -Path "dist" -File |
-        Where-Object { $_.Name -ine "tesseract.zip" } |
-        Remove-Item -Force
+    Where-Object { $_.Name -ine "tesseract.zip" } |
+    Remove-Item -Force
 }
 
 Invoke-Step { uv run pyinstaller --noconfirm --clean --onefile --console --name "gtaol-ceo-helper" main.py }
 Copy-Item -Path "config.example.yaml" -Destination "dist\config.yaml" -Force
-Invoke-Step { uv run pyinstaller --noconfirm --clean --onefile --console --name "find_coords" "tools\find_coords.py" }
+Invoke-Step { uv run pyinstaller --noconfirm --clean --onefile --console --name "find_coords" find_coords.py }
 
 $packageDir = "dist\gtaol-ceo-helper"
 New-Item -Path $packageDir -ItemType Directory -Force | Out-Null

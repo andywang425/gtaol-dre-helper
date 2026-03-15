@@ -178,9 +178,9 @@ def ocr_screen_region(
         }
         screenshot = _get_mss().grab(monitor)
         screenshot_image = Image.frombytes(
-            "RGB", screenshot.size, screenshot.rgb, "raw", "BGRX")
+            "RGB", screenshot.size, screenshot.bgra, "raw", "BGRX")
 
-        return ocr_image(screenshot_image, )
+        return ocr_image(screenshot_image)
     except Exception as e:
         print(f"OCR Error: {e}")
         return ""
