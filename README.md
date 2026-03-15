@@ -6,16 +6,82 @@
 
 ## 安装
 
-1. 前往 [Release 页面](https://github.com/andywang425/gtaol-ceo-helper/releases/latest)，下载 `gtaol-ceo-helper.zip`、`tesseract.zip`（可选但推荐下载）和 `find_coords.exe`（可选）。
+1. 前往 [Release 页面](https://github.com/andywang425/gtaol-ceo-helper/releases/latest)，下载 `gtaol-ceo-helper.zip`、`tesseract.zip` 和 `find_coords.exe`（可选）。
 2. 解压 `gtaol-ceo-helper.zip` 到任意目录。
 3. 把 `tesseract.zip` 解压到 `gtaol-ceo-helper` 目录下。
-4. 编辑 `config.yaml` 配置文件，配置项含义见注释。过程中可能会用到 `find_coords.exe` 辅助定位 OCR 区域。
+4. 编辑 `config.yaml` 配置文件。过程中可能会用到 `find_coords.exe` 辅助定位 OCR 区域。
+
+## 配置项说明（`config.yaml`）
+
+完整结构如下：
+
+```yaml
+# 屏幕监控配置
+monitor:
+  # 监控开关键，按一次开启，再按一次关闭
+  # 支持的按键详见下文
+  toggle_key: "f12"
+
+  # OCR 识别区域
+  # 单位：屏幕像素
+  # 程序会截图这个矩形区域识别“已加入人数/人数上限”
+  # x, y: 矩形左上角坐标
+  # width, height: 矩形宽高
+  #
+  # 全屏游戏时各屏幕分辨率推荐设置：
+  # 4k (3840x2160): x=3609, y=1974, width=172, height=55
+  # 2k (2560x1440): x=2409, y=1314, width=105, height=37
+  # 1080p (1920x1080): x=1807, y=986, width=78, height=27
+  region:
+    x: 3609
+    y: 1974
+    width: 172
+    height: 55
+
+# 执行动作
+actions:
+  # 动作序列
+  # key: 按下的键。支持 'm', 'enter', 'up', 'down' 等（还支持很多其它的，但是卡CEO时用不到）
+  # hold: 按下持续时长(秒)。默认0.1秒
+  # delay: 每次按键后的延迟(秒)。默认0.05秒
+  # times: 按键次数。默认1次
+  sequence:
+    - key: "m" # 打开菜单
+      hold: 0.03
+      delay: 0.18
+    - key: "down" # 向下选择两次
+      hold: 0.03
+      delay: 0.06
+      times: 2
+    - key: "enter" # 连续确认三次
+      hold: 0.03
+      delay: 0.06
+      times: 3
+```
+
+<details>
+  <summary> toggle_key 支持的按键（点击展开）</summary>
+
+- 功能键：`f1` ~ `f24`
+- 单个字母或数字：`a`~`z`、`0`~`9`
+- 特殊键：
+  - `backspace`, `tab`, `enter`, `shift`, `ctrl`, `alt`, `pause`, `capslock`, `esc`, `space`
+  - `pageup`, `pagedown`, `end`, `home`
+  - `left`, `up`, `right`, `down`
+  - `insert`, `delete`
+- 小键盘：
+  - 数字：`numpad0`~`numpad9` 或 `kp0`~`kp9`
+  - 运算符：除号 `numpad_div`(`num_div`), 乘号 `numpad_mul`(`num_mul`), 减号 `numpad_sub`(`num_sub`), 加号 `numpad_add`(`num_add`), 小数点 `numpad_decimal`(`num_decimal`),
+
+> 不区分大小写，例如 `F12` 和 `f12` 等价。
+
+</details>
 
 ## 使用方法
 
 1. 双击运行 `gtaol-ceo-helper.exe`。
 2. 游戏中打开手机，选择快速加入，开始匹配差事。
-3. 按你设置好的快捷键开启监控。
+3. 按你设置好的快捷键 (默认是`f12`) 开启监控。
 4. 当匹配到差事并且已加入人数 >=2 时，程序会自动按键注册为 CEO。然后监控会停止，如需再次监控请按你设置好的快捷键重新开启。
 5. 如果长时间匹配不到差事弹出了”注意“警告，或者匹配到差事之后秒进了，请手动退出来打开手机重新匹配。
 
@@ -29,7 +95,7 @@
 
 ## 注意
 
-本程序会高频获取全屏幕截图，注册为 CEO 时会模拟键盘按键。这两个操作底层都是通过win32 API实现的。可能存在风险，介意勿用。
+本程序会频繁获取屏幕截图，注册为 CEO 时会模拟键盘按键。这两个操作底层都是通过win32 API实现的。可能存在风险，介意勿用。
 
 > 我个人认为风险不大，因为本程序没有任何直接读写游戏数据的操作（截图也是屏幕截图而不是获取游戏窗口画面）
 
