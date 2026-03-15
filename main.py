@@ -62,7 +62,8 @@ def main():
                         print(f"检测到已加入人数: {joined}")
 
                         if joined >= MIN_PLAYERS_TRIGGER:
-                            print(f"满足条件 (>= {MIN_PLAYERS_TRIGGER})，执行操作！")
+                            print(
+                                f"满足条件 (已加入人数 >= {MIN_PLAYERS_TRIGGER})，执行操作！")
                             monitoring = False
                             execute_sequence(sequence)
                             print(f"操作完成，监控已自动停止。按 {toggle_key} 重新开启。")

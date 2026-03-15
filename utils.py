@@ -245,27 +245,22 @@ def execute_sequence(sequence: list):
         sequence: 动作列表。每个动作示例：
             {"key": "m", "delay": 0.1, "hold": 0.03, "times": 1}
     """
-    print("开始执行操作序列...")
-    original_pause = getattr(pydirectinput, "PAUSE", 0)
-    pydirectinput.PAUSE = 0
-    try:
-        for action in sequence:
-            key = action.get("key")
-            if not key:
-                continue
-            delay = max(0.0, float(action.get("delay", ACTION_DEFAULT_DELAY)))
-            hold = max(0.0, float(action.get("hold", ACTION_DEFAULT_HOLD)))
-            times = max(1, int(action.get("times", ACTION_DEFAULT_TIMES)))
-            for _ in range(times):
-                pydirectinput.keyDown(key, _pause=False)
-                if hold > 0:
-                    time.sleep(hold)
-                pydirectinput.keyUp(key, _pause=False)
-                if delay > 0:
-                    time.sleep(delay)
-    finally:
-        pydirectinput.PAUSE = original_pause
-    print("操作序列执行完毕")
+    for action in sequence:
+        key = action.get("key")
+        if not key:
+            continue
+
+        delay = float(action.get("delay", ACTION_DEFAULT_DELAY))
+        hold = float(action.get("hold", ACTION_DEFAULT_HOLD))
+        times = int(action.get("times", ACTION_DEFAULT_TIMES))
+
+        for _ in range(times):
+            pydirectinput.keyDown(key, _pause=False)
+            if hold > 0:
+                time.sleep(hold)
+            pydirectinput.keyUp(key, _pause=False)
+            if delay > 0:
+                time.sleep(delay)
 
 
 def get_virtual_key_code(key: str) -> Optional[int]:
