@@ -1,56 +1,23 @@
 # 屏幕监控配置
 monitor:
-  # OCR 文字识别间隔（秒），值越小识别越频繁；根据你的 CPU 性能调整
-  # 程序会自动在此基础上追加一个0.1秒左右的随机延迟
-  check_interval_seconds: 0.6
   # 监控开关按键（如 f12、f11）
   toggle_key: "f12"
-  # OCR 识别区域（“已加入人数/人数上限”所在的小区域，如 “负面宣传 2/4”，识别区域为 “2/4”）
-  # 可借助辅助工具 find_coords 定位
-  # 对于 16:9 的显示器，若游戏内图像设置为全屏显示，几套推荐设置如下：
+  
+  # OCR 识别区域（“已加入人数/人数上限”所在的小区域）
+  # 推荐设置：
   # 4k (3840x2160): x=3609, y=1974, width=172, height=55
   # 2k (2560x1440): x=2409, y=1314, width=105, height=37
   # 1080p (1920x1080): x=1807, y=986, width=78, height=27
   region:
-    # 识别区域左上角 X 坐标（像素）
     x: 3609
-    # 识别区域左上角 Y 坐标（像素）
     y: 1974
-    # 识别区域宽度（像素）
     width: 172
-    # 识别区域高度（像素）
     height: 55
-
-  # OCR (文字识别) 配置（非高级用户谨慎修改）
-  ocr:
-    # Tesseract OCR 安装路径 (使用软件自带的 Tesseract 时可忽略；如果在系统 PATH 中可留空)
-    tesseract_cmd: "BUNDLED_TESSERACT"
-    # 语言（理论上不应该修改）
-    lang: "eng"
-    # 识别“已加入人数/上限人数”时使用的 Tesseract 参数
-    count_tesseract_config: "--oem 3 --psm 7 -c tessedit_char_whitelist=0123456789/"
-    # OCR 预处理配置
-    preprocess:
-      # 图像放大倍数（提高小字识别率）
-      upscale: 1.5
-      # 颜色过滤配置（突出目标文字颜色）
-      color_filter:
-        # 是否启用颜色过滤
-        enabled: true
-        # 目标文字颜色（十六进制）
-        target_hex: "#eeeeee"
-        # 颜色容差（越大匹配越宽松）
-        tolerance: 28
-
-# 动作触发条件
-trigger:
-  # 最小加入人数 (大于等于此值时触发)
-  min_players: 2
 
 # 执行动作
 actions:
   # 动作序列
-  # key: 按下的键；支持的键: 'm', 'enter', 'up', 'down', 'left', 'right' 等
+  # key: 按下的键；支持 'm', 'enter', 'up', 'down' 等
   # hold: 按下持续时长(秒)；delay: 每次按键后的延迟(秒)；repeat: 重复次数
   sequence:
     - key: "m" # 打开菜单

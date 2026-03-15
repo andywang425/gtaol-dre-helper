@@ -8,9 +8,10 @@ import pydirectinput
 import time
 import pyautogui
 from typing import Tuple, Optional, Dict, Any
+from constants import *
 
 
-def load_config(path: str = "config.yaml"):
+def load_config(path: str = CONFIG_FILE_PATH):
     """
     从 YAML 文件加载配置。
 
@@ -30,16 +31,12 @@ def load_config(path: str = "config.yaml"):
         return yaml.safe_load(f)
 
 
-def setup_tesseract(tesseract_cmd: str):
+def setup_tesseract():
     """
-    根据配置设置 Tesseract 可执行文件路径。
+    设置 Tesseract 可执行文件路径。
     优先检查程序目录下的 tesseract/tesseract.exe (便携版/打包版)。
-    如果不存在，则使用配置文件中的路径。
-
-    Args:
-        tesseract_cmd: Tesseract ORC 安装路径。
     """
-    # 1. 优先检查本地 bundled Tesseract
+    # 优先检查本地 bundled Tesseract
     if getattr(sys, 'frozen', False):
         # 如果是打包后的 exe，基准路径是 exe 所在目录
         base_path = os.path.dirname(sys.executable)
@@ -47,15 +44,12 @@ def setup_tesseract(tesseract_cmd: str):
         # 如果是脚本运行，基准路径是当前文件所在目录
         base_path = os.path.dirname(os.path.abspath(__file__))
 
-    bundled_tesseract = os.path.join(base_path, "tesseract", "tesseract.exe")
+    bundled_tesseract = os.path.join(
+        base_path, TESSERACT_SUBDIR, TESSERACT_EXECUTABLE)
+
     if os.path.exists(bundled_tesseract):
         pytesseract.pytesseract.tesseract_cmd = bundled_tesseract
         print(f"使用内置 Tesseract OCR")
-        return
-
-    # 2. 回退到配置文件路径
-    if tesseract_cmd and os.path.exists(tesseract_cmd):
-        pytesseract.pytesseract.tesseract_cmd = tesseract_cmd
 
 
 def _hex_to_rgb(hex_color: str) -> Tuple[int, int, int]:
@@ -72,7 +66,7 @@ def _hex_to_rgb(hex_color: str) -> Tuple[int, int, int]:
         ValueError: 颜色值长度不是 6 位时抛出。
     """
     cleaned = hex_color.strip().lstrip("#")
-    if len(cleaned) != 6:
+    if len(cleaned) != COLOR_HEX_LENGTH:
         raise ValueError(f"无效颜色值: {hex_color}")
     return tuple(int(cleaned[i:i + 2], 16) for i in (0, 2, 4))
 
@@ -99,8 +93,10 @@ def preprocess_ocr_image(image: Image.Image, preprocess_config: Optional[Dict[st
     if not use_color_filter:
         processed = image.convert("L")
     else:
-        target_hex = color_filter_cfg.get("target_hex", "#eeeeee")
-        tolerance = int(color_filter_cfg.get("tolerance", 24))
+        target_hex = color_filter_cfg.get(
+            "target_hex", OCR_DEFAULT_COLOR_TARGET)
+        tolerance = int(color_filter_cfg.get(
+            "tolerance", OCR_DEFAULT_COLOR_TOLERANCE))
         target_r, target_g, target_b = _hex_to_rgb(target_hex)
 
         rgb_image = image.convert("RGB")
@@ -113,7 +109,7 @@ def preprocess_ocr_image(image: Image.Image, preprocess_config: Optional[Dict[st
         binary.putdata(mask_data)
         processed = binary
 
-    upscale = float(config.get("upscale", 1.0))
+    upscale = float(config.get("upscale", OCR_DEFAULT_UPSCALE))
     if upscale > 1.0:
         width, height = processed.size
         processed = processed.resize(
@@ -126,27 +122,21 @@ def preprocess_ocr_image(image: Image.Image, preprocess_config: Optional[Dict[st
 
 def ocr_image(
     image: Image.Image,
-    lang: str = "eng",
-    tesseract_config: str = "",
-    preprocess_config: Optional[Dict[str, Any]] = None
 ) -> str:
     """
     对单张图像执行 OCR 识别。
 
     Args:
         image: 待识别图像。
-        lang: Tesseract 语言代码。
-        tesseract_config: 传给 Tesseract 的附加参数。
-        preprocess_config: OCR 前预处理配置。
 
     Returns:
         识别后的文本，失败时返回空字符串。
     """
     try:
         processed_image = preprocess_ocr_image(
-            image, preprocess_config=preprocess_config)
+            image, preprocess_config=OCR_PREPROCESS_CONFIG)
         text = pytesseract.image_to_string(
-            processed_image, lang=lang, config=tesseract_config)
+            processed_image, lang=OCR_DEFAULT_LANG, config=OCR_TESSERACT_CONFIG)
         return text.strip()
     except pytesseract.TesseractNotFoundError:
         print("错误: 未找到 Tesseract OCR。请确保已安装并在 config.yaml 中配置正确路径。")
@@ -158,18 +148,12 @@ def ocr_image(
 
 def ocr_screen_region(
     region: Tuple[int, int, int, int],
-    lang: str = "eng",
-    tesseract_config: str = "",
-    preprocess_config: Optional[Dict[str, Any]] = None
 ) -> str:
     """
     截取屏幕指定区域并执行 OCR 识别。
 
     Args:
         region: 屏幕区域，格式为 (x, y, width, height)。
-        lang: Tesseract 语言代码。
-        tesseract_config: 传给 Tesseract 的附加参数。
-        preprocess_config: OCR 前预处理配置。
 
     Returns:
         识别后的文本，失败时返回空字符串。
@@ -179,9 +163,6 @@ def ocr_screen_region(
         screenshot = pyautogui.screenshot(region=region)
         return ocr_image(
             screenshot,
-            lang=lang,
-            tesseract_config=tesseract_config,
-            preprocess_config=preprocess_config
         )
     except Exception as e:
         print(f"OCR Error: {e}")
@@ -191,9 +172,6 @@ def ocr_screen_region(
 def ocr_image_file(
     image_path: str,
     region: Tuple[int, int, int, int],
-    lang: str = "eng",
-    tesseract_config: str = "",
-    preprocess_config: Optional[Dict[str, Any]] = None
 ) -> str:
     """
     从图片文件中裁剪指定区域并执行 OCR 识别 (调试用)。
@@ -201,9 +179,6 @@ def ocr_image_file(
     Args:
         image_path: 图片文件路径。
         region: 裁剪区域，格式为 (x, y, width, height)。
-        lang: Tesseract 语言代码。
-        tesseract_config: 传给 Tesseract 的附加参数。
-        preprocess_config: OCR 前预处理配置。
 
     Returns:
         识别后的文本，失败时返回空字符串。
@@ -214,9 +189,6 @@ def ocr_image_file(
             cropped_image = image.crop((x, y, x + width, y + height))
             return ocr_image(
                 cropped_image,
-                lang=lang,
-                tesseract_config=tesseract_config,
-                preprocess_config=preprocess_config
             )
     except FileNotFoundError:
         print(f"错误: 文件不存在: {image_path}")
@@ -228,9 +200,9 @@ def ocr_image_file(
 
 def parse_player_count(text: str) -> Optional[int]:
     """
-    从文本中解析“已加入人数/人数上限”格式的人数。
+    从文本中解析"已加入人数/人数上限"格式的人数。
 
-    例如：“2/4”会返回 2。
+    例如："2/4"会返回 2。
 
     Args:
         text: OCR 识别得到的原始文本。
@@ -264,9 +236,9 @@ def execute_sequence(sequence: list):
             key = action.get("key")
             if not key:
                 continue
-            delay = max(0.0, float(action.get("delay", 0.05)))
-            hold = max(0.0, float(action.get("hold", 0.03)))
-            repeat = max(1, int(action.get("repeat", 1)))
+            delay = max(0.0, float(action.get("delay", ACTION_DEFAULT_DELAY)))
+            hold = max(0.0, float(action.get("hold", ACTION_DEFAULT_HOLD)))
+            repeat = max(1, int(action.get("repeat", ACTION_DEFAULT_REPEAT)))
             for _ in range(repeat):
                 pydirectinput.keyDown(key, _pause=False)
                 if hold > 0:

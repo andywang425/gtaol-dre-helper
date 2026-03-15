@@ -2,8 +2,7 @@ import time
 import random
 import keyboard
 from utils import load_config, setup_tesseract, ocr_screen_region, parse_player_count, execute_sequence
-
-LOOP_INTERVAL = 0.05
+from constants import *
 
 
 def main():
@@ -19,21 +18,7 @@ def main():
             raise ValueError("配置文件 config.yaml 缺少必要字段 monitor.region")
         region_tuple = (region['x'], region['y'],
                         region['width'], region['height'])
-        check_interval_seconds = float(monitor_cfg.get(
-            "check_interval_seconds", 0.6))
-        toggle_key = monitor_cfg.get("toggle_key", "f12")
-
-        ocr_cfg = monitor_cfg.get("ocr", {})
-        tesseract_cmd = ocr_cfg.get("tesseract_cmd", "BUNDLED_TESSERACT")
-        lang = ocr_cfg.get("lang", "eng")
-        count_tesseract_config = ocr_cfg.get(
-            "count_tesseract_config",
-            "--oem 3 --psm 7 -c tessedit_char_whitelist=0123456789/"
-        )
-        preprocess_config = ocr_cfg.get("preprocess", {})
-
-        trigger_cfg = config.get("trigger", {})
-        min_players = trigger_cfg.get("min_players", 2)
+        toggle_key = monitor_cfg.get("toggle_key", DEFAULT_TOGGLE_KEY)
 
         actions_cfg = config.get("actions", {})
         sequence = actions_cfg.get("sequence")
@@ -41,12 +26,10 @@ def main():
             raise ValueError("配置文件 config.yaml 缺少必要字段 actions.sequence")
 
         # 设置 Tesseract
-        setup_tesseract(tesseract_cmd)
+        setup_tesseract()
 
         print(f"监控区域: {region}")
         print(f"监控开关按键: {toggle_key}")
-        print(f"OCR 检测间隔: {check_interval_seconds} 秒")
-        print(f"触发条件: >= {min_players} 人")
         print("--------------------------------")
         print(f"监控状态: 关闭")
 
@@ -66,12 +49,7 @@ def main():
             if monitoring:
                 now = time.monotonic()
                 if now >= next_check_at:
-                    text = ocr_screen_region(
-                        region_tuple,
-                        lang=lang,
-                        tesseract_config=count_tesseract_config,
-                        preprocess_config=preprocess_config
-                    )
+                    text = ocr_screen_region(region_tuple)
 
                     if text:
                         print(f"识别到的文本: {text}")
@@ -81,18 +59,18 @@ def main():
                     if joined is not None:
                         print(f"检测到已加入人数: {joined}")
 
-                        if joined >= min_players:
-                            print(f"满足条件 (>= {min_players})，执行操作！")
+                        if joined >= MIN_PLAYERS_TRIGGER:
+                            print(f"满足条件 (>= {MIN_PLAYERS_TRIGGER})，执行操作！")
                             monitoring = False
                             execute_sequence(sequence)
                             print(f"操作完成，监控已自动停止。按 {toggle_key} 重新开启。")
-                    next_check_at = time.monotonic() + check_interval_seconds + \
-                        random.uniform(0.05, 0.15)
+                    next_check_at = time.monotonic() + MONITOR_CHECK_INTERVAL + \
+                        random.uniform(RANDOM_DELAY_MIN, RANDOM_DELAY_MAX)
 
-            time.sleep(LOOP_INTERVAL)
+            time.sleep(MAIN_LOOP_INTERVAL)
 
     except KeyboardInterrupt:
-        print("\n程序已手动停止。")
+        print("\n程序已正常退出")
 
     except Exception as e:
         print(f"错误: {e}")

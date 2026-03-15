@@ -1,12 +1,12 @@
 # GTAOL CEO Helper
 
-这是一个帮助 GTA Online 玩家自动执行“卡CEO“操作的小工具。原理是通过 OCR 识别屏幕右下角的文字，当检测到已加入人数符合要求时，自动执行预设的按键操作注册为 CEO。
+这是一个帮助 GTA Online 玩家自动执行“卡CEO“操作的小工具。原理是通过 OCR 识别屏幕右下角的文字，当检测到已加入人数 >=2 时，自动执行预设的按键操作注册为 CEO。
 
 > 此处的”卡CEO“指利用德瑞bot跳前置时的”卡CEO“，不是差传的”卡CEO“（这个用宏就能搞定）
 
 ## 安装
 
-1. 前往 [Release 页面](https://github.com/andywang425/gtaol-ceo-helper/releases)，下载 `gtaol-ceo-helper.zip`、`tesseract.zip`（可选但推荐下载）和 `find_coords.exe`（可选）。
+1. 前往 [Release 页面](https://github.com/andywang425/gtaol-ceo-helper/releases/latest)，下载 `gtaol-ceo-helper.zip`、`tesseract.zip`（可选但推荐下载）和 `find_coords.exe`（可选）。
 2. 解压 `gtaol-ceo-helper.zip` 到任意目录。
 3. 把 `tesseract.zip` 解压到 `gtaol-ceo-helper` 目录下。
 4. 编辑 `config.yaml` 配置文件，配置项含义见注释。过程中可能会用到 `find_coords.exe` 辅助定位 OCR 区域。
@@ -16,7 +16,7 @@
 1. 双击运行 `gtaol-ceo-helper.exe`。
 2. 游戏中打开手机，选择快速加入，开始匹配差事。
 3. 按你设置好的快捷键开启监控。
-4. 当匹配到差事并且已加入人数符合要求时，程序会自动按键注册为 CEO。然后监控会停止，如需再次监控请按你设置好的快捷键重新开启。
+4. 当匹配到差事并且已加入人数 >=2 时，程序会自动按键注册为 CEO。然后监控会停止，如需再次监控请按你设置好的快捷键重新开启。
 5. 如果长时间匹配不到差事弹出了”注意“警告，或者匹配到差事之后秒进了，请手动退出来打开手机重新匹配。
 
 ## 定位 OCR 区域
