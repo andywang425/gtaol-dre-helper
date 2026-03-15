@@ -1,7 +1,6 @@
 import time
 import random
-import keyboard
-from utils import load_config, setup_tesseract, ocr_screen_region, parse_player_count, execute_sequence
+from utils import load_config, setup_tesseract, ocr_screen_region, parse_player_count, execute_sequence, get_virtual_key_code, is_vk_pressed
 from constants import *
 
 
@@ -24,6 +23,9 @@ def main():
         sequence = actions_cfg.get("sequence")
         if not sequence:
             raise ValueError("配置文件 config.yaml 缺少必要字段 actions.sequence")
+        toggle_vk_code = get_virtual_key_code(toggle_key)
+        if toggle_vk_code is None:
+            raise ValueError(f"不支持的监控开关键: {toggle_key}")
 
         # 设置 Tesseract
         setup_tesseract()
@@ -38,7 +40,7 @@ def main():
         next_check_at = 0.0
 
         while True:
-            toggle_pressed = keyboard.is_pressed(toggle_key)
+            toggle_pressed = is_vk_pressed(toggle_vk_code)
             if toggle_pressed and not toggle_was_pressed:
                 monitoring = not monitoring
                 print(f"监控状态: {'开启' if monitoring else '关闭'}")
