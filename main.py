@@ -103,12 +103,12 @@ def main():
                                 active_profile_index = None
 
                                 print(
-                                    f"满足条件 (已加入人数 >= {MIN_PLAYERS_TRIGGER})，执行方案: {current_profile['name']}")
+                                    f"满足条件 (已加入人数 >= {MIN_PLAYERS_TRIGGER})，执行方案【{current_profile['name']}】的按键序列")
                                 execute_sequence(current_profile["sequence"])
                                 print(
                                     f"操作完成，监控已自动停止")
-                next_check_at = time.monotonic() + MONITOR_CHECK_INTERVAL + \
-                    random.uniform(RANDOM_DELAY_MIN, RANDOM_DELAY_MAX)
+                    next_check_at = time.monotonic() + MONITOR_CHECK_INTERVAL + \
+                        random.uniform(RANDOM_DELAY_MIN, RANDOM_DELAY_MAX)
 
             time.sleep(MAIN_LOOP_INTERVAL)
 
