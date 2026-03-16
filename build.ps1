@@ -26,11 +26,11 @@ if (Test-Path "dist") {
     Write-Host "Cleaning dist folder..."
 
     Get-ChildItem -Path "dist" -Directory |
-    Where-Object { $_.Name -ine "tesseract" } |
+    Where-Object { $_.Name -inotlike "tesseract*" } |
     Remove-Item -Recurse -Force
 
     Get-ChildItem -Path "dist" -File |
-    Where-Object { $_.Name -ine "tesseract.zip" } |
+    Where-Object { $_.Name -inotlike "tesseract*" } |
     Remove-Item -Force
 }
 

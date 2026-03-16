@@ -6,9 +6,9 @@
 
 ## 安装
 
-1. 前往 [Release 页面](https://github.com/andywang425/gtaol-ceo-helper/releases/latest)，下载 `gtaol-ceo-helper.zip`、`tesseract.zip` 和 `find_coords.exe`（可选）。
+1. 前往 [Release 页面](https://github.com/andywang425/gtaol-ceo-helper/releases/latest)，下载 `gtaol-ceo-helper.zip`、`tesseract.7z` 和 `find_coords.exe`（可选）。
 2. 解压 `gtaol-ceo-helper.zip` 到任意目录。
-3. 把 `tesseract.zip` 解压到 `gtaol-ceo-helper` 目录下。
+3. 把 `tesseract.7z` 解压到 `gtaol-ceo-helper` 目录下。
 4. 编辑 `config.yaml` 配置文件。过程中可能会用到 `find_coords.exe` 辅助定位 OCR 区域。
 
 ## 配置项说明（`config.yaml`）

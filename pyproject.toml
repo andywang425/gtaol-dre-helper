@@ -1,6 +1,6 @@
 [project]
 name = "gtaol-ceo-helper"
-version = "1.1.0"
+version = "1.2.0"
 requires-python = ">=3.12"
 dependencies = [
   "pytesseract==0.3.13",
