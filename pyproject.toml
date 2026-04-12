@@ -1,14 +1,18 @@
 [project]
-name = "gtaol-ceo-helper"
-version = "1.2.0"
-requires-python = ">=3.12"
+name = "gtaol-dre-helper"
+version = "2.0.0"
+requires-python = ">=3.14"
 dependencies = [
-  "pytesseract==0.3.13",
-  "Pillow==12.1.1",
-  "pydirectinput-rgx==2.1.3",
-  "mss==10.1.0",
-  "PyYAML==6.0.3",
+  "pytesseract~=0.3.13",
+  "Pillow>=12.1.1,<13.0.0",
+  "mss>=10.1.0,<11.0.0",
+  "PyYAML>=6.0.3,<7.0.0",
+  "textual>=8.2.3,<9.0.0",
+  "pydantic>=2.12.5,<3.0.0",
 ]
 
 [dependency-groups]
-dev = ["pyinstaller==6.19.0"]
+dev = ["pyinstaller~=6.19.0", "pytest>=9.0.2,<10.0.0", "textual-dev~=1.8.0"]
+
+[tool.pytest]
+testpaths = ["tests"]

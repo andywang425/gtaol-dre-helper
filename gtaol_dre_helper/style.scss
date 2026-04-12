@@ -1,0 +1,46 @@
+DashboardScreen {
+  #dashboard {
+    margin: 1;
+
+    OverviewPanel {
+      height: auto;
+      padding: 1 2 0 2;
+      margin-bottom: 1;
+      border: panel $primary;
+      layout: grid;
+      grid-size: 2;
+      dock: top;
+    }
+
+    .item {
+      height: auto;
+      width: 1fr;
+
+      Label {
+        width: auto;
+      }
+
+      .text {
+        width: 1fr;
+      }
+    }
+
+    AvailableProfilesPanel {
+      height: auto;
+      padding: 1;
+      margin-bottom: 1;
+      border: solid $primary;
+    }
+
+    LogPanel {
+      height: 1fr;
+      padding-left: 1;
+      border: round $primary;
+      overflow-y: auto;
+
+      RichLog {
+        padding-left: 1;
+      }
+    }
+  }
+}

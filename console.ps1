@@ -1,0 +1,1 @@
+uv run textual console -x SYSTEM -x EVENT $args

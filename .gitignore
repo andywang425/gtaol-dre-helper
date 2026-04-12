@@ -219,3 +219,6 @@ config.yaml
 
 # Tesseract OCR
 tesseract/
+
+# Claude
+.claude/
