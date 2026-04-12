@@ -283,6 +283,10 @@ profiles:
 
 > 我个人认为风险不大，因为本程序没有任何直接读写游戏数据的操作（截图也是屏幕截图而不是获取游戏窗口画面）
 
+## 更新日志
+
+详见 [CHANGELOG.md](CHANGELOG.md)
+
 ## 相关推荐
 
 ### [QuellGTA](https://www.mageangela.cn/QuellGTA/)
