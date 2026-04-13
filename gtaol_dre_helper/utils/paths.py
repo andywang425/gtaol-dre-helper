@@ -3,6 +3,10 @@ import sys
 
 
 def _get_runtime_root() -> Path:
+    """返回程序运行时的根目录
+
+    打包后返回可执行文件所在目录；开发环境下返回项目根目录
+    """
     if getattr(sys, "frozen", False):
         return Path(sys.executable).resolve().parent
 
@@ -10,4 +14,5 @@ def _get_runtime_root() -> Path:
 
 
 def get_runtime_resource_path(*parts: str) -> Path:
+    """基于运行时根目录拼接资源路径"""
     return _get_runtime_root().joinpath(*parts)

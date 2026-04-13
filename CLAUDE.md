@@ -42,7 +42,9 @@
 ## 常用脚本
 
 - 打包：`.\build.ps1`
-  - 会执行依赖同步、`PyInstaller` 打包、编译 `RegionLocator.exe`、复制 `config.example.yaml` 与 `tesseract` 资源，并生成 `7z` 压缩包
+  - 默认后端是 `Nuitka`，会执行依赖同步、主程序打包、使用 Visual Studio Build Tools 编译 `RegionLocator.exe`、复制 `config.example.yaml` 与 `tesseract` 资源，并生成 `7z` 压缩包
+  - 可通过 `.\build.ps1 -Backend nuitka` 或 `.\build.ps1 -Backend pyinstaller` 显式指定后端
+  - 具体后端脚本：`.\build-nuitka.ps1`、`.\build-pyinstaller.ps1`
 
 ## 代码质量命令
 

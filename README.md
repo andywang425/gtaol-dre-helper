@@ -22,77 +22,22 @@
 
 ## 安装
 
-1. 前往 [Release 页面](https://github.com/andywang425/gtaol-dre-helper/releases/latest)，下载 `gtaol-dre-helper.7z`。
-2. 解压 `gtaol-dre-helper.7z` 到任意目录。
-3. 编辑其中的 `config.yaml` 配置文件。过程中可能会用到 `RegionLocator.exe` 辅助定位 OCR/颜色 识别区域。
-
-<details>
-<summary> 从源代码运行（点击展开）</summary>
-
-1. 安装 Python 3.14+ 和 [uv](https://docs.astral.sh/uv/)
-2. 克隆仓库到本地
-   ```powershell
-   git clone https://github.com/andywang425/gtaol-dre-helper.git
-   ```
-3. 进入项目根目录
-   ```powershell
-   cd gtaol-dre-helper
-   ```
-4. 创建虚拟环境
-   ```powershell
-   uv venv --python 3.14
-   ```
-5. 安装依赖
-   ```powershell
-   uv sync --group dev
-   ```
-6. 复制示例配置文件
-   ```powershell
-   Copy-Item config.example.yaml config.yaml
-   ```
-7. 准备 OCR 所需的 [Tesseract](https://github.com/UB-Mannheim/tesseract/releases/latest)
-
-   可以从 Release 包中把整个 `tesseract` 目录复制过来，这是经过精简后的 `Tesseract`，删除了非必要的文件
-
-8. 按需修改 `config.yaml`
-9. 启动程序
-
-   ```powershell
-   uv run python main.py
-   ```
-
-   或者先激活虚拟环境再直接运行
-
-   ```powershell
-   .venv\Scripts\activate
-   python main.py
-   ```
-
-   如果要调试代码，建议先启动 Textual 控制台
-
-   ```powershell
-   .\console
-   ```
-
-   然后以开发模式运行
-
-   ```powershell
-   .\dev
-   ```
-
-</details>
+1. 前往 [Release 页面](https://github.com/andywang425/gtaol-dre-helper/releases/latest)。
+2. 优先下载 `gtaol-dre-helper-nuitka.7z`；如果遇到兼容性问题，可尝试 `gtaol-dre-helper.7z`（如果有的话）。
+3. 解压下载好的压缩包到任意目录。
+4. 打开文件夹，编辑其中的 `config.yaml` 配置文件。过程中可能会用到同目录下的 `RegionLocator.exe` 辅助定位 OCR/颜色 识别区域。
 
 ## 配置项说明（`config.yaml`）
 
 完整结构如下：
 
 ```yaml
-# 识别区域
+## 识别区域
 # 单位：屏幕像素
 # x, y: 矩形左上角坐标
 # width, height: 矩形宽高
 region:
-  # OCR 识别区域
+  # 卡 CEO: OCR 识别区域
   # 程序会截图这个矩形区域识别“已加入人数/人数上限”
   #
   # 全屏游戏时各屏幕分辨率推荐设置：
@@ -105,7 +50,7 @@ region:
     width: 172
     height: 55
 
-  # 卡单识别区域
+  # 卡单: 颜色识别区域
   # 程序会获取这区域内像素的颜色值，判断菜单是否消失
   #
   # 全屏游戏时各屏幕分辨率推荐设置：
@@ -167,11 +112,10 @@ profiles:
         interval: 0.5
 ```
 
-<details>
-  <summary> toggle_key 支持的按键（点击展开）</summary>
+`toggle_key` 和 `sequence.key` 支持的按键：
 
-- 支持单键，也支持使用 `+` 连接组合键，例如 `f11`、`ctrl+f11`、`alt+numpad1`
-- 不区分大小写，程序会自动规范化为小写，例如 `Ctrl+F11` 会被当成 `ctrl+f11`
+- 支持单键，也支持使用 `+` 连接组合键，例如 `f11`、`alt+numpad1`
+- 不区分大小写，程序会自动规范化为小写，例如 `Ctrl+F12` 会被当成 `ctrl+f12`
 - 同一个组合键里不能出现重复按键，例如 `ctrl+ctrl+f11` 不合法
 - 支持以下标准名称：
 
@@ -203,46 +147,7 @@ profiles:
 | `num_decimal`  | `numpad_decimal`       |
 | `num_div`      | `numpad_div`           |
 
-</details>
-
-<details>
-  <summary> sequence.key 支持的按键（点击展开）</summary>
-
-- 支持单键，也支持使用 `+` 连接组合键，例如 `m`、`enter`、`ctrl+c`、`alt+1`
-- 不区分大小写，程序会自动规范化为小写，例如 `Alt+1` 会被当成 `alt+1`
-- 组合键中的按键会按书写顺序依次按下，全部按下后再开始计算 `hold`
-- 支持的按键范围与 `toggle_key` 基本一致，但 **不支持** **`pause`**
-- 支持以下标准名称：
-
-| 分类       | 支持的按键                                                                                       |
-| ---------- | ------------------------------------------------------------------------------------------------ |
-| 字母       | `a` \~ `z`                                                                                       |
-| 数字       | `0` \~ `9`                                                                                       |
-| 功能键     | `f1` \~ `f24`                                                                                    |
-| 修饰键     | `shift`、`ctrl`、`alt`                                                                           |
-| 常用控制键 | `backspace`、`tab`、`enter`、`capslock`、`esc`、`space`                                          |
-| 导航键     | `pageup`、`pagedown`、`home`、`end`、`left`、`up`、`right`、`down`、`insert`、`delete`           |
-| 小键盘     | `numpad0` \~ `numpad9`、`numpad_mul`、`numpad_add`、`numpad_sub`、`numpad_decimal`、`numpad_div` |
-
-- 同样支持下面这些别名，写法和 `toggle_key` 一样：
-
-| 别名           | 标准名称               |
-| -------------- | ---------------------- |
-| `control`      | `ctrl`                 |
-| `return`       | `enter`                |
-| `escape`       | `esc`                  |
-| `del`          | `delete`               |
-| `ins`          | `insert`               |
-| `pgup`         | `pageup`               |
-| `pgdn`         | `pagedown`             |
-| `kp0` \~ `kp9` | `numpad0` \~ `numpad9` |
-| `num_mul`      | `numpad_mul`           |
-| `num_add`      | `numpad_add`           |
-| `num_sub`      | `numpad_sub`           |
-| `num_decimal`  | `numpad_decimal`       |
-| `num_div`      | `numpad_div`           |
-
-</details>
+> 注：`pause` 是特例，`toggle_key` 支持但 `sequence.key` 不支持
 
 ## 使用方法
 

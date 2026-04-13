@@ -1,7 +1,7 @@
 [project]
 name = "gtaol-dre-helper"
 version = "2.0.0"
-requires-python = ">=3.14"
+requires-python = ">=3.14,<3.15"
 dependencies = [
   "pytesseract~=0.3.13",
   "Pillow>=12.1.1,<13.0.0",
@@ -12,7 +12,12 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["pyinstaller~=6.19.0", "pytest>=9.0.2,<10.0.0", "textual-dev~=1.8.0"]
+dev = [
+  "nuitka~=4.0.3",
+  "pyinstaller~=6.19.0",
+  "pytest>=9.0.2,<10.0.0",
+  "textual-dev~=1.8.0",
+]
 
 [tool.pytest]
 testpaths = ["tests"]
