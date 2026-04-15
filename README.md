@@ -23,30 +23,39 @@
 ## 安装
 
 1. 前往 [Release 页面](https://github.com/andywang425/gtaol-dre-helper/releases/latest)。
-2. 优先下载 `gtaol-dre-helper-nuitka.7z`；如果遇到兼容性问题，可尝试 `gtaol-dre-helper.7z`（如果有的话）。
+2. 优先下载 `gtaol-dre-helper.7z`；若遇到兼容性问题，可尝试 `gtaol-dre-helper-pyinstaller.7z`（如果有的话）。
 3. 解压下载好的压缩包到任意目录。
-4. 打开文件夹，编辑其中的 `config.yaml` 配置文件。过程中可能会用到同目录下的 `RegionLocator.exe` 辅助定位 OCR/颜色 识别区域。
+4. 双击运行 `gtaol-dre-helper.exe`。
+5. 按 `ctrl+e` 编辑配置文件；改完保存后，回到程序按 `ctrl+r` 重载配置。如需定位 OCR/颜色识别区域，可使用同目录下的 `RegionLocator.exe` 辅助工具。
 
-## 配置项说明（`config.yaml`）
+## 更新
 
-完整结构如下：
+目前程序不支持自动更新，需要手动下载最新版本。
+
+可以沿用旧的 `config.yaml` 配置文件。如果配置格式发生变化，程序会报错并提示你修改。
+
+**注意**：请勿修改示例配置文件（`config.example.yaml`）。
+
+## 配置项说明
+
+`config.yaml` 完整结构如下：
 
 ```yaml
-## 识别区域
+# 识别区域
 # 单位：屏幕像素
-# x, y: 矩形左上角坐标
+# left, top: 矩形左上角坐标
 # width, height: 矩形宽高
 region:
   # 卡 CEO: OCR 识别区域
   # 程序会截图这个矩形区域识别“已加入人数/人数上限”
   #
   # 全屏游戏时各屏幕分辨率推荐设置：
-  # 4k (3840x2160): x=3609, y=1974, width=172, height=55
-  # 2k (2560x1440): x=2409, y=1314, width=105, height=37
-  # 1080p (1920x1080): x=1807, y=986, width=78, height=27
+  # 4k (3840x2160): left=3609, top=1974, width=172, height=55
+  # 2k (2560x1440): left=2409, top=1314, width=105, height=37
+  # 1080p (1920x1080): left=1807, top=986, width=78, height=27
   ceo:
-    x: 3609
-    y: 1974
+    left: 3609
+    top: 1974
     width: 172
     height: 55
 
@@ -54,12 +63,12 @@ region:
   # 程序会获取这区域内像素的颜色值，判断菜单是否消失
   #
   # 全屏游戏时各屏幕分辨率推荐设置：
-  # 4k (3840x2160): x=630, y=408, width=367, height=41
-  # 2k (2560x1440): x=420, y=272, width=244, height=27
-  # 1080p (1920x1080): x=315, y=204, width=183, height=20
+  # 4k (3840x2160): left=630, top=408, width=367, height=41
+  # 2k (2560x1440): left=420, top=272, width=244, height=27
+  # 1080p (1920x1080): left=315, top=204, width=183, height=20
   single:
-    x: 630
-    y: 408
+    left: 630
+    top: 408
     width: 367
     height: 41
 
@@ -70,44 +79,44 @@ region:
 # 按键序列 (sequence)：包含多个按键操作
 # 每个按键操作包含一个按键 (key)、一个按住时间 (hold)、一个组合键间隔时间 (interval)、一个延迟时间 (delay) 和一个执行次数 (times)
 # 按键 (key)：支持 'm', 'enter', 'up', 'down' 等，也支持用 '+' 连接组合键，如 'ctrl+c'
-# 按住时间：按键保持按下的时间（单位秒，默认值为 0.05）
-# 组合键间隔时间：组合键中每个按键之间的间隔时间（单位秒，默认值为 0.05），等所有键被按下后才开始计算按住时间
-# 延迟时间：每次按键之后等待的时间（单位秒，默认值为 0.1）
-# 执行次数：按键操作执行的次数（默认值为 1）
+# 按住时间 (hold)：按键保持按下的时间（单位秒，默认值为 0.05）
+# 组合键间隔时间 (interval)：组合键中每个按键之间的间隔时间（单位秒，默认值为 0.05），等所有键被按下后才开始计算按住时间
+# 延迟时间 (delay)：每次按键之后等待的时间（单位秒，默认值为 0.1）
+# 执行次数 (times)：按键操作执行的次数（默认值为 1）
 profiles:
   - name: 室外
     type: ceo
-    toggle_key: "f11"
+    toggle_key: f11
     sequence:
-      - key: "m" # 打开菜单
+      - key: m # 打开菜单
         delay: 0.18
-      - key: "down" # 向下移动一次
+      - key: down # 向下移动一次
         delay: 0.06
-      - key: "enter" # 连续确认三次
+      - key: enter # 连续确认三次
         delay: 0.06
         times: 3
 
   - name: 室内
     type: ceo
-    toggle_key: "f12"
+    toggle_key: f12
     sequence:
-      - key: "m" # 打开菜单
+      - key: m # 打开菜单
         delay: 0.18
-      - key: "down" # 向下移动两次
+      - key: down # 向下移动两次
         delay: 0.06
         times: 2
-      - key: "enter" # 连续确认三次
+      - key: enter # 连续确认三次
         delay: 0.06
         times: 3
 
   - name: 卡单
     type: single
-    toggle_key: "alt+numpad1"
+    toggle_key: alt+numpad1
     sequence:
       # 小红帽的卡单快捷键（流程详解：先按住 alt 0.5 秒，然后 alt+1 一起按住 0.5 秒，最后立刻全部松开）
       # 小红帽热键引擎模式说明：本软件不支持代理模式，仅支持直连模式和轮询模式
       # 如果开了轮询模式，请将 hold 和 interval 调大一点 （建议至少 0.5 秒），否则可能无法触发快捷键
-      - key: "alt+1"
+      - key: alt+1
         hold: 0.5
         interval: 0.5
 ```

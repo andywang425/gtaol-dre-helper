@@ -51,19 +51,11 @@ gtaol-dre-helper
    uv sync --group dev
    ```
 
-5. 复制示例配置文件，
-
-   ```powershell
-   Copy-Item config.example.yaml config.yaml
-   ```
-
-   然后按需修改。
-
-6. 准备 OCR 所需的 [Tesseract](https://github.com/UB-Mannheim/tesseract/releases/latest)
+5. 准备 OCR 所需的 [Tesseract](https://github.com/UB-Mannheim/tesseract/releases/latest)
 
    建议从[Release 包](https://github.com/andywang425/gtaol-dre-helper/releases/latest)中把整个 `tesseract` 目录复制过来，这是精简后的版本，去掉了非必要文件。
 
-7. 启动程序
+6. 启动程序
 
    ```powershell
    uv run python main.py
@@ -147,12 +139,12 @@ uv run python -m nuitka --version
 
 构建完成后，产物位于 `dist` 目录，常见内容包括：
 
-- `dist\gtaol-dre-helper-nuitka`
-- `dist\gtaol-dre-helper-nuitka.7z`
 - `dist\gtaol-dre-helper`
 - `dist\gtaol-dre-helper.7z`
+- `dist\gtaol-dre-helper-pyinstaller`
+- `dist\gtaol-dre-helper-pyinstaller.7z`
 
-正式发版时优先使用 `gtaol-dre-helper-nuitka.7z`。
+正式发版时优先使用 `gtaol-dre-helper.7z`。
 
 ### 冒烟检查
 

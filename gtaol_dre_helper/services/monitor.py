@@ -1,12 +1,14 @@
 import threading
 import time
 from collections.abc import Callable
+import traceback
 from typing import Optional
 
 from textual.message import Message
-from gtaol_dre_helper.models.config import RuntimeProfile
+from gtaol_dre_helper.models.config import AppConfig, RuntimeProfile
 from gtaol_dre_helper.utils.logging import LogLevel, LogStyle
 from gtaol_dre_helper.models.monitor import MonitorDependencies, MonitorState
+from gtaol_dre_helper.utils.screen import clean_mss
 
 # 主循环间隔 (秒)
 MAIN_LOOP_INTERVAL = 0.05
@@ -51,6 +53,8 @@ class MonitorService:
             self.profiles = profiles
             super().__init__()
 
+    config: AppConfig | None = None
+
     def __init__(
         self,
         *,
@@ -71,7 +75,6 @@ class MonitorService:
 
         dependencies = dependencies or MonitorDependencies()
 
-        self.load_config_fn = dependencies.load_config
         self.setup_tesseract_fn = dependencies.setup_tesseract
         self.ocr_screen_region_fn = dependencies.ocr_screen_region
         self.get_screen_region_average_color_fn = dependencies.get_screen_region_average_color
@@ -84,6 +87,10 @@ class MonitorService:
         self.stop_event = threading.Event()
 
         self.state = MonitorState()
+
+    def set_config(self, config: AppConfig) -> None:
+        """设置监控配置"""
+        self.config = config
 
     @property
     def is_running(self) -> bool:
@@ -118,27 +125,23 @@ class MonitorService:
             self.initialize_runtime()
             self.run_loop()
         except Exception as e:
-            self.log("error", f"监控服务出错: {e}")
+            self.log("error", f"监控服务出错: {e}\n{traceback.format_exc()}")
+        finally:
+            # Python MSS bug：mss实例只能在创建它的线程中使用
+            # https://github.com/BoboTiG/python-mss/issues/273
+            clean_mss()
 
     def initialize_runtime(self) -> None:
         """初始化服务运行时环境"""
-        config = self.load_config_fn()
+        if self.config is None:
+            raise ValueError("配置缺失，无法初始化监控服务")
 
-        self.state.configure(
-            profiles={
-                profile.toggle_key: profile.to_runtime_profile()
-                for profile in config.profiles
-            },
-            regions={
-                "ceo": config.region.ceo.to_tuple(),
-                "single": config.region.single.to_tuple()
-            },
-        )
-
-        self.setup_tesseract_fn()
+        self.state.configure(self.config)
 
         self.post_message(self.ProfilesLoaded(
             list(self.state.profiles.values())))
+
+        self.setup_tesseract_fn()
 
         self.log("info", f"监控区域: {self.state.regions}")
         self.log(

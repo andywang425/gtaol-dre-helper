@@ -1,44 +1,51 @@
-from typing import Tuple, cast
+from typing import cast
 from PIL import Image
 from mss.windows import MSS as mss
+
+from gtaol_dre_helper.types import ColorTuple, RegionDict
 
 SINGLE_COLOR_TOLERANCE = 16
 SINGLE_COLOR_MIN_MATCH_RATIO = 0.88
 
 
-_mss_instance = None
+_mss_instance: mss | None = None
 
 
-def _get_mss():
+def get_mss():
+    """获取全局 mss 实例"""
     global _mss_instance
     if _mss_instance is None:
         _mss_instance = mss()
     return _mss_instance
 
 
-def get_screen_region_average_color(region: Tuple[int, int, int, int]) -> Tuple[int, int, int]:
+def clean_mss():
+    """清理全局 mss 实例"""
+    global _mss_instance
+    if _mss_instance is not None:
+        try:
+            _mss_instance.close()
+        except Exception as e:
+            print(f"关闭 mss 实例时出错: {e}")
+        finally:
+            _mss_instance = None
+
+
+def get_screen_region_average_color(region: RegionDict) -> ColorTuple:
     """
     获取屏幕指定区域的平均颜色
 
     Args:
-        region: 屏幕区域，格式为 (x, y, width, height)
+        region: 屏幕区域
 
     Returns:
-        (R, G, B) 颜色三元组
+        区域平均颜色
     """
-    x, y, width, height = region
-
-    monitor = {
-        "left": int(x),
-        "top": int(y),
-        "width": int(width),
-        "height": int(height),
-    }
-    screenshot = _get_mss().grab(monitor)
+    screenshot = get_mss().grab(cast(dict[str, int], region))
     screenshot_image = Image.frombytes(
         "RGB", screenshot.size, screenshot.bgra, "raw", "BGRX")
     region_pixels = cast(
-        tuple[tuple[int, int, int]], screenshot_image.get_flattened_data())
+        tuple[ColorTuple], screenshot_image.get_flattened_data())
 
     pixel_count = len(region_pixels)
 
@@ -48,29 +55,21 @@ def get_screen_region_average_color(region: Tuple[int, int, int, int]) -> Tuple[
 
     print(f"区域平均色: {avg_r:.2f}, {avg_g:.2f}, {avg_b:.2f}")
 
-    return (avg_r, avg_g, avg_b)
+    return ColorTuple(avg_r, avg_g, avg_b)
 
 
-def check_screen_region_color(region: Tuple[int, int, int, int], init_color: Tuple[float, float, float]) -> bool:
+def check_screen_region_color(region: RegionDict, init_color: ColorTuple) -> bool:
     """
     获取屏幕指定区域颜色，并判断绝大多数像素是否都近似于初始颜色
 
     Args:
-        region: 屏幕区域，格式为 (x, y, width, height)
-        init_color: 初始颜色，格式为 (R, G, B)
+        region: 屏幕区域
+        init_color: 初始颜色
 
     Returns:
         如果区域绝大多数像素都近似于初始颜色，则返回 True，否则返回 False
     """
-    x, y, width, height = region
-
-    monitor = {
-        "left": int(x),
-        "top": int(y),
-        "width": int(width),
-        "height": int(height),
-    }
-    screenshot = _get_mss().grab(monitor)
+    screenshot = get_mss().grab(cast(dict[str, int], region))
     screenshot_image = Image.frombytes(
         "RGB", screenshot.size, screenshot.bgra, "raw", "BGRX")
     region_pixels = cast(

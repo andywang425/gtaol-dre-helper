@@ -1,7 +1,17 @@
-from typing import Literal
+from typing import Literal, NamedTuple, TypedDict
 
 
 ProfileTypes = Literal["ceo", "single"]
 
-RegionTuple = tuple[int, int, int, int]
-ColorTuple = tuple[int, int, int]
+
+class RegionDict(TypedDict):
+    left: int
+    top: int
+    width: int
+    height: int
+
+
+class ColorTuple(NamedTuple):
+    r: int
+    g: int
+    b: int

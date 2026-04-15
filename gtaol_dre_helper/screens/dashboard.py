@@ -73,11 +73,11 @@ class AvailableProfilesPanel(Widget):
 
     def watch_profiles(self, old_profiles: list[RuntimeProfile], new_profiles: list[RuntimeProfile]) -> None:
         """监听可用方案列表变化"""
-        if not new_profiles:
-            return
-
         table = self.dataTable
         table.clear()
+
+        if not new_profiles:
+            return
 
         for profile in new_profiles:
             action_keys = [

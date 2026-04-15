@@ -6,12 +6,13 @@ from textual.markup import escape
 
 LogLevel = Literal["info", "error", "warning"]
 
-LogStyle = Union[LogLevel, Literal["auto", "success"]]
+LogStyle = Union[LogLevel, Literal["auto", "success", "accent"]]
 
 STYLE2CSSVARS: dict[LogStyle, str] = {
     "success": "$text-success",
     "error": "$text-error",
     "warning": "$text-warning",
+    "accent": "$text-accent",
 }
 
 LEVEL2MARKUP: dict[LogLevel, str] = {

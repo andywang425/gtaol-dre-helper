@@ -104,8 +104,7 @@ class CompiledSendInputKey:
 
 def _normalize_key_name(key: str) -> str:
     """将按键名称规范化为内部统一使用的格式"""
-    normalized_key = str(key).strip().lower()
-    return KEY_ALIASES.get(normalized_key, normalized_key)
+    return KEY_ALIASES.get(key, key)
 
 
 def get_virtual_key_code(key: str) -> Optional[int]:
@@ -176,11 +175,10 @@ def is_vk_pressed(vk_code: int) -> bool:
 
 def parse_key_combo(value: str, *, field_name: str) -> tuple[str, ...]:
     """将按键字符串解析为规范化后的按键序列"""
-    normalized_value = str(value).strip().lower()
-    if not normalized_value:
+    if not value:
         raise ValueError(f"{field_name}不能为空")
 
-    parts = tuple(part.strip() for part in normalized_value.split("+"))
+    parts = tuple(part for part in value.split("+"))
     if any(len(part) == 0 for part in parts):
         raise ValueError(f"无效的组合键格式: {value}")
 

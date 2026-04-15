@@ -2,6 +2,7 @@ $ErrorActionPreference = "Stop"
 
 $distDir = "dist"
 $packageName = "gtaol-dre-helper"
+$packageDirName = "$packageName-pyinstaller"
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $scriptDir
@@ -29,7 +30,7 @@ Compile-RegionLocator -OutputPath "dist\RegionLocator.exe"
 
 Write-Host "Packaging application files..."
 
-$packageDir = Join-Path $distDir $packageName
+$packageDir = Join-Path $distDir $packageDirName
 if (Test-Path $packageDir) {
     Remove-Item -Path $packageDir -Recurse -Force
 }
@@ -37,11 +38,11 @@ if (Test-Path $packageDir) {
 New-Item -Path $packageDir -ItemType Directory -Force | Out-Null
 Move-Item -Path "dist\$packageName.exe" -Destination $packageDir -Force
 Move-Item -Path "dist\RegionLocator.exe" -Destination $packageDir -Force
-Copy-Item -Path "config.example.yaml" -Destination (Join-Path $packageDir "config.yaml") -Force
+Copy-Item -Path "config.example.yaml" -Destination (Join-Path $packageDir "config.example.yaml") -Force
 Copy-Item -Path "tesseract" -Destination (Join-Path $packageDir "tesseract") -Recurse -Force
 
-$archiveFileName = "$packageName.7z"
-Invoke-Create7ZipArchive -DistDir $distDir -ArchiveFileName $archiveFileName -SourcePath $packageName
+$archiveFileName = "$packageDirName.7z"
+Invoke-Create7ZipArchive -DistDir $distDir -ArchiveFileName $archiveFileName -SourcePath $packageDirName
 
 
 Write-Host ""

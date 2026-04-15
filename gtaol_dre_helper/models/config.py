@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from functools import cached_property
-from typing import Self
+from typing import Annotated, Self
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, field_validator, model_validator
 from gtaol_dre_helper.utils.hotkey import (
     CompiledSendInputKey,
     compile_action_keys,
@@ -12,7 +12,7 @@ from gtaol_dre_helper.utils.hotkey import (
     is_sendinput_supported_key,
     parse_key_combo,
 )
-from gtaol_dre_helper.types import ProfileTypes
+from gtaol_dre_helper.types import ProfileTypes, RegionDict
 
 
 ACTION_DEFAULT_DELAY = 0.1
@@ -22,9 +22,9 @@ ACTION_DEFAULT_TIMES = 1
 
 
 class ActionStep(BaseModel):
-    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, str_to_lower=True)
 
-    key: str
+    key: str = Field(coerce_numbers_to_str=True)
     interval: float = Field(default=ACTION_DEFAULT_INTERVAL, ge=0)
     hold: float = Field(default=ACTION_DEFAULT_HOLD, gt=0)
     delay: float = Field(default=ACTION_DEFAULT_DELAY, ge=0)
@@ -53,11 +53,13 @@ class ActionStep(BaseModel):
 
 
 class ProfileConfig(BaseModel):
-    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True)
 
-    name: str
-    type: ProfileTypes = Field(default="ceo")
-    toggle_key: str
+    name: str = Field(coerce_numbers_to_str=True)
+    type: Annotated[ProfileTypes, BeforeValidator(
+        str.lower)] = Field(default="ceo")
+    toggle_key: Annotated[str, BeforeValidator(
+        str.lower)] = Field(coerce_numbers_to_str=True)
     sequence: list[ActionStep] = Field(min_length=1)
 
     @field_validator("toggle_key")
@@ -114,34 +116,34 @@ class RuntimeActionStep:
     compiled_keys: tuple[CompiledSendInputKey, ...] = field(
         default_factory=tuple)
 
-    def __post_init__(self) -> None:
-        if not self.compiled_keys:
-            object.__setattr__(self, "compiled_keys",
-                               compile_action_keys(self.keys))
-
 
 class Region(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    x: int
-    y: int
+    left: int = Field(ge=0)
+    top: int = Field(ge=0)
     width: int = Field(gt=0)
     height: int = Field(gt=0)
 
-    def to_tuple(self) -> tuple[int, int, int, int]:
-        return (self.x, self.y, self.width, self.height)
+    def to_dict(self) -> RegionDict:
+        return {
+            "left": self.left,
+            "top": self.top,
+            "width": self.width,
+            "height": self.height,
+        }
 
 
 class RegionConfig(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
     ceo: Region
     single: Region
 
+    def to_dict(self) -> dict[ProfileTypes, RegionDict]:
+        return {
+            "ceo": self.ceo.to_dict(),
+            "single": self.single.to_dict(),
+        }
+
 
 class AppConfig(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
     region: RegionConfig
     profiles: list[ProfileConfig] = Field(min_length=1)
 

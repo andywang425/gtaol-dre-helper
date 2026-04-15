@@ -4,9 +4,9 @@ import pytesseract
 
 from PIL import Image
 
-from gtaol_dre_helper.types import ColorTuple, RegionTuple
+from gtaol_dre_helper.types import ColorTuple, RegionDict
 from gtaol_dre_helper.utils.paths import get_runtime_resource_path
-from gtaol_dre_helper.utils.screen import _get_mss
+from gtaol_dre_helper.utils.screen import get_mss
 
 
 # Tesseract 默认配置
@@ -83,7 +83,7 @@ def _ocr_image(
 
 
 def ocr_screen_region(
-    region: RegionTuple,
+    region: RegionDict,
 ) -> str:
     """
     截取屏幕指定区域并执行 OCR 识别
@@ -94,14 +94,7 @@ def ocr_screen_region(
     Returns:
         识别到的文本
     """
-    x, y, width, height = region
-    monitor = {
-        "left": x,
-        "top": y,
-        "width": width,
-        "height": height,
-    }
-    screenshot = _get_mss().grab(monitor)
+    screenshot = get_mss().grab(cast(dict[str, int], region))
     screenshot_image = Image.frombytes(
         "RGB", screenshot.size, screenshot.bgra, "raw", "BGRX")
 

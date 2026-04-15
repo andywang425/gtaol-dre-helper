@@ -1,7 +1,13 @@
+from gtaol_dre_helper.models.config import ActionStep
+from gtaol_dre_helper.models.config import AppConfig
+from gtaol_dre_helper.models.config import ProfileConfig
+from gtaol_dre_helper.models.config import Region
+from gtaol_dre_helper.models.config import RegionConfig
 from gtaol_dre_helper.models.config import RuntimeActionStep
 from gtaol_dre_helper.models.config import RuntimeProfile
 from gtaol_dre_helper.models.monitor import MonitorDependencies, MonitorState
 from gtaol_dre_helper.services.monitor import MonitorService
+from gtaol_dre_helper.types import ColorTuple, RegionDict
 
 
 def build_profile(name: str, toggle_key: str, toggle_vk_codes: tuple[int, ...]) -> RuntimeProfile:
@@ -19,7 +25,8 @@ def test_monitor_state_activate_and_deactivate_manage_runtime_fields() -> None:
     profile = build_profile("方案 A", "f1", (112,))
     state = MonitorState(
         profiles={"f1": profile},
-        regions={"ceo": (1, 2, 3, 4), "single": (5, 6, 7, 8)},
+        regions={"ceo": {"left": 1, "top": 2, "width": 3, "height": 4},
+                 "single": {"left": 5, "top": 6, "width": 7, "height": 8}},
         next_check_at=1.5,
     )
 
@@ -31,7 +38,7 @@ def test_monitor_state_activate_and_deactivate_manage_runtime_fields() -> None:
     assert state.active_profile_key == "f1"
     assert state.next_check_at == 0.0
 
-    state.set_menu_color((1, 2, 3))
+    state.set_menu_color(ColorTuple(r=1, g=2, b=3))
     state.deactivate()
 
     assert state.monitoring is False
@@ -42,23 +49,35 @@ def test_monitor_state_activate_and_deactivate_manage_runtime_fields() -> None:
 
 def test_monitor_state_configure_resets_pressed_states_and_runtime_flags() -> None:
     # 验证重新加载配置时，会清空旧的按键状态并重置监控运行态。
-    profile = build_profile("方案 A", "f1", (112,))
+    config = AppConfig(
+        region=RegionConfig(
+            ceo=Region(left=1, top=2, width=3, height=4),
+            single=Region(left=5, top=6, width=7, height=8),
+        ),
+        profiles=[
+            ProfileConfig(
+                name="方案 A",
+                type="ceo",
+                toggle_key="f1",
+                sequence=[ActionStep(key="f5")],
+            )
+        ],
+    )
+    expected_profile = config.profiles[0].to_runtime_profile()
     state = MonitorState(
         monitoring=True,
         active_profile_key="f1",
         pressed_states={"legacy": True},
-        menu_color=(1, 2, 3),
+        menu_color=ColorTuple(r=1, g=2, b=3),
         next_check_at=2.0,
     )
 
-    state.configure(
-        profiles={"f1": profile},
-        regions={"ceo": (1, 2, 3, 4), "single": (5, 6, 7, 8)},
-    )
+    state.configure(config)
 
-    assert state.profiles == {"f1": profile}
+    assert state.profiles == {"f1": expected_profile}
     assert state.pressed_states == {"f1": False}
-    assert state.regions["ceo"] == (1, 2, 3, 4)
+    assert state.regions["ceo"] == {
+        "left": 1, "top": 2, "width": 3, "height": 4}
     assert state.monitoring is False
     assert state.active_profile is None
     assert state.menu_color is None
@@ -145,11 +164,13 @@ def test_run_ceo_monitor_cycle_executes_sequence_when_threshold_reached() -> Non
         dependencies=MonitorDependencies(
             ocr_screen_region=lambda _: "2/4",
             parse_player_count=lambda _: 2,
-            execute_sequence=lambda sequence: executed_sequences.append(list(sequence)),
+            execute_sequence=lambda sequence: executed_sequences.append(
+                list(sequence)),
         ),
     )
     service.state.profiles = {"f1": profile}
-    service.state.regions = {"ceo": (1, 2, 3, 4), "single": (5, 6, 7, 8)}
+    service.state.regions = {"ceo": {"left": 1, "top": 2, "width": 3, "height": 4}, "single": {
+        "left": 5, "top": 6, "width": 7, "height": 8}}
     service.state.activate("f1")
 
     service.run_ceo_monitor_cycle()
@@ -158,14 +179,15 @@ def test_run_ceo_monitor_cycle_executes_sequence_when_threshold_reached() -> Non
     assert service.state.monitoring is False
     assert service.state.active_profile is None
     assert any(
-        isinstance(message, MonitorService.OverviewChanged) and message.monitoring is False
+        isinstance(
+            message, MonitorService.OverviewChanged) and message.monitoring is False
         for message in messages
     )
 
 
 def test_run_single_monitor_cycle_caches_menu_color_before_detecting_change() -> None:
     # 验证卡单监控首次运行时只记录菜单基准颜色，不会提前执行动作序列。
-    captured_regions: list[tuple[int, int, int, int]] = []
+    captured_regions: list[RegionDict] = []
     executed_sequences: list[list[RuntimeActionStep]] = []
     profile = RuntimeProfile(
         name="卡单方案",
@@ -185,17 +207,20 @@ def test_run_single_monitor_cycle_caches_menu_color_before_detecting_change() ->
     service = MonitorService(
         post_message=lambda _: True,
         dependencies=MonitorDependencies(
-            get_screen_region_average_color=lambda region: captured_regions.append(region) or (10, 20, 30),
-            execute_sequence=lambda sequence: executed_sequences.append(list(sequence)),
+            get_screen_region_average_color=lambda region: captured_regions.append(
+                region) or ColorTuple(r=10, g=20, b=30),
+            execute_sequence=lambda sequence: executed_sequences.append(
+                list(sequence)),
         ),
     )
     service.state.profiles = {"f2": profile}
-    service.state.regions = {"ceo": (1, 2, 3, 4), "single": (5, 6, 7, 8)}
+    service.state.regions = {"ceo": {"left": 1, "top": 2, "width": 3, "height": 4}, "single": {
+        "left": 5, "top": 6, "width": 7, "height": 8}}
     service.state.activate("f2")
 
     service.run_single_monitor_cycle()
 
-    assert captured_regions == [(5, 6, 7, 8)]
+    assert captured_regions == [{"left": 5, "top": 6, "width": 7, "height": 8}]
     assert service.state.menu_color == (10, 20, 30)
     assert executed_sequences == []
     assert service.state.monitoring is True
@@ -204,7 +229,7 @@ def test_run_single_monitor_cycle_caches_menu_color_before_detecting_change() ->
 def test_run_single_monitor_cycle_executes_sequence_when_menu_color_changes() -> None:
     # 验证卡单监控在检测到菜单颜色变化后，会执行动作序列并自动停止监控。
     executed_sequences: list[list[RuntimeActionStep]] = []
-    checked_regions: list[tuple[tuple[int, int, int, int], tuple[int, int, int]]] = []
+    checked_regions: list[tuple[RegionDict, ColorTuple]] = []
     profile = RuntimeProfile(
         name="卡单方案",
         type="single",
@@ -223,17 +248,25 @@ def test_run_single_monitor_cycle_executes_sequence_when_menu_color_changes() ->
     service = MonitorService(
         post_message=lambda _: True,
         dependencies=MonitorDependencies(
-            check_screen_region_color=lambda region, color: checked_regions.append((region, color)) or False,
-            execute_sequence=lambda sequence: executed_sequences.append(list(sequence)),
+            check_screen_region_color=lambda region, color: checked_regions.append(
+                (region, color)) or False,
+            execute_sequence=lambda sequence: executed_sequences.append(
+                list(sequence)),
         ),
     )
     service.state.profiles = {"f2": profile}
-    service.state.regions = {"ceo": (1, 2, 3, 4), "single": (5, 6, 7, 8)}
+    service.state.regions = {"ceo": {"left": 1, "top": 2, "width": 3, "height": 4}, "single": {
+        "left": 5, "top": 6, "width": 7, "height": 8}}
     service.state.activate("f2")
-    service.state.set_menu_color((10, 20, 30))
+    service.state.set_menu_color(ColorTuple(r=10, g=20, b=30))
 
     service.run_single_monitor_cycle()
 
-    assert checked_regions == [((5, 6, 7, 8), (10, 20, 30))]
+    assert checked_regions == [
+        (
+            {"left": 5, "top": 6, "width": 7, "height": 8},
+            ColorTuple(r=10, g=20, b=30),
+        )
+    ]
     assert executed_sequences == [profile.sequence]
     assert service.state.monitoring is False

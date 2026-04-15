@@ -6,24 +6,22 @@ from typing import Optional
 
 from gtaol_dre_helper.models.config import AppConfig, ProfileTypes, RuntimeActionStep, RuntimeProfile
 
-from gtaol_dre_helper.utils.config import load_config
 from gtaol_dre_helper.utils.screen import get_screen_region_average_color, check_screen_region_color
 from gtaol_dre_helper.utils.ocr import ocr_screen_region, setup_tesseract
 from gtaol_dre_helper.utils.input import execute_sequence
 from gtaol_dre_helper.utils.text_parser import parse_player_count
 from gtaol_dre_helper.utils.hotkey import is_vk_pressed
-from gtaol_dre_helper.types import RegionTuple, ColorTuple
+from gtaol_dre_helper.types import RegionDict, ColorTuple
 
 
 @dataclass(slots=True)
 class MonitorDependencies:
-    load_config: Callable[[], AppConfig] = load_config
     setup_tesseract: Callable[[], None] = setup_tesseract
-    ocr_screen_region: Callable[[RegionTuple], str] = ocr_screen_region
+    ocr_screen_region: Callable[[RegionDict], str] = ocr_screen_region
     get_screen_region_average_color: Callable[[
-        RegionTuple], ColorTuple] = get_screen_region_average_color
+        RegionDict], ColorTuple] = get_screen_region_average_color
     check_screen_region_color: Callable[[
-        RegionTuple, ColorTuple], bool] = check_screen_region_color
+        RegionDict, ColorTuple], bool] = check_screen_region_color
     parse_player_count: Callable[[str], Optional[int]] = parse_player_count
     execute_sequence: Callable[[
         Sequence[RuntimeActionStep]], None] = execute_sequence
@@ -34,7 +32,7 @@ class MonitorDependencies:
 class MonitorState:
     profiles: dict[str, RuntimeProfile] = field(default_factory=dict)
     pressed_states: dict[str, bool] = field(default_factory=dict)
-    regions: dict[ProfileTypes, RegionTuple] = field(default_factory=dict)
+    regions: dict[ProfileTypes, RegionDict] = field(default_factory=dict)
     monitoring: bool = False
     active_profile_key: Optional[str] = None
     menu_color: Optional[ColorTuple] = None
@@ -47,19 +45,17 @@ class MonitorState:
             return None
         return self.profiles.get(self.active_profile_key)
 
-    def configure(
-        self,
-        *,
-        profiles: dict[str, RuntimeProfile],
-        regions: dict[ProfileTypes, RegionTuple],
-    ) -> None:
+    def configure(self, config: AppConfig, ) -> None:
         """配置监控状态"""
-        self.profiles = profiles
+        self.profiles = {
+            profile.toggle_key: profile.to_runtime_profile()
+            for profile in config.profiles
+        }
         self.pressed_states = {
             key: False
-            for key in profiles
+            for key in self.profiles
         }
-        self.regions = regions
+        self.regions = config.region.to_dict()
         self.deactivate()
         self.next_check_at = 0.0
 
@@ -78,7 +74,7 @@ class MonitorState:
         self.active_profile_key = None
         self.menu_color = None
 
-    def region_for(self, profile_type: ProfileTypes) -> RegionTuple:
+    def region_for(self, profile_type: ProfileTypes) -> RegionDict:
         """获取指定类型的区域配置"""
         return self.regions[profile_type]
 

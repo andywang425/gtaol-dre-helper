@@ -3,7 +3,7 @@ $ErrorActionPreference = "Stop"
 $distDir = "dist"
 $buildDir = "build"
 $packageName = "gtaol-dre-helper"
-$packageDirName = "$packageName-nuitka"
+$packageDirName = $packageName
 $packageDir = Join-Path $distDir $packageDirName
 $tempBuildDir = Join-Path $buildDir $packageDirName
 $archiveFileName = "$packageDirName.7z"
@@ -44,7 +44,7 @@ if ($null -eq $standaloneDir) {
 
 Write-Host "Packaging application files..."
 Move-Item -Path $standaloneDir.FullName -Destination $packageDir -Force
-Copy-Item -Path "config.example.yaml" -Destination (Join-Path $packageDir "config.yaml") -Force
+Copy-Item -Path "config.example.yaml" -Destination (Join-Path $packageDir "config.example.yaml") -Force
 Copy-Item -Path "tesseract" -Destination (Join-Path $packageDir "tesseract") -Recurse -Force
 
 Write-Host "Building RegionLocator..."
