@@ -65,14 +65,14 @@ region:
   # 程序会获取这区域内像素的颜色值，判断菜单是否消失
   #
   # 全屏游戏时各屏幕分辨率推荐设置：
-  # 4k (3840x2160): left=630, top=408, width=367, height=41
-  # 2k (2560x1440): left=420, top=272, width=244, height=27
-  # 1080p (1920x1080): left=315, top=204, width=183, height=20
+  # 4k (3840x2160): left=633, top=408, width=367, height=55
+  # 2k (2560x1440): left=424, top=275, width=241, height=29
+  # 1080p (1920x1080): left=319, top=206, width=180, height=22
   single:
-    left: 630
+    left: 633
     top: 408
     width: 367
-    height: 41
+    height: 55
 
 # 监控方案
 # 每个方案包含一个名称 (name)、一个类型 (type)、一个开关键 (toggle_key) 和一个按键序列 (sequence)
