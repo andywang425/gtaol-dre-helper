@@ -5,6 +5,7 @@ from pydantic import ValidationError
 
 import gtaol_dre_helper.utils.config as config_utils
 from gtaol_dre_helper.models.config import AppConfig
+from gtaol_dre_helper.types import Resolution
 from gtaol_dre_helper.utils.config import EXAMPLE_CONFIG_FILE_NAME
 
 
@@ -59,6 +60,61 @@ def test_get_or_create_config_file_raises_when_config_and_example_are_missing(mo
 
     with pytest.raises(FileNotFoundError, match="config.example.yaml"):
         config_utils.get_or_create_config_file()
+
+
+def test_write_initial_config_content_preserves_comments_while_updating_region_values(monkeypatch, tmp_path) -> None:
+    # 验证首次写入配置时会更新推荐区域，同时保留模板中的注释和其他 YAML 结构。
+    config_path = tmp_path / "config.yaml"
+    example_path = tmp_path / EXAMPLE_CONFIG_FILE_NAME
+    write_config_file(
+        example_path,
+        """
+# 顶部注释
+region:
+  # CEO 注释
+  ceo:
+    left: 1
+    top: 2
+    width: 3
+    height: 4
+
+  # SINGLE 注释
+  single:
+    left: 5
+    top: 6
+    width: 7
+    height: 8
+
+profiles:
+  - name: 室外
+    type: ceo
+    toggle_key: f11
+    sequence:
+      - key: m # 打开菜单
+""".strip()
+        + "\n",
+    )
+    monkeypatch.setattr(
+        config_utils,
+        "get_primary_screen_resolution",
+        lambda: Resolution(1920, 1080),
+    )
+
+    config_utils._write_recommended_config(config_path, example_path)
+    content = config_path.read_text(encoding="utf-8")
+
+    assert "# 顶部注释" in content
+    assert "# CEO 注释" in content
+    assert "# SINGLE 注释" in content
+    assert "# 打开菜单" in content
+    assert "left: 1807" in content
+    assert "top: 986" in content
+    assert "width: 78" in content
+    assert "height: 27" in content
+    assert "left: 315" in content
+    assert "top: 204" in content
+    assert "width: 183" in content
+    assert "height: 20" in content
 
 
 def test_load_config_returns_validated_app_config(monkeypatch, tmp_path) -> None:

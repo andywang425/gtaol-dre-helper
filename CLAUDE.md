@@ -18,7 +18,7 @@
   - `pydantic`：配置模型与校验
   - `pytesseract` + 内置 `tesseract.exe`：OCR
   - `mss` + `Pillow`：截图与图像处理
-  - `PyYAML`：读取 `config.yaml`
+  - `ruamel.yaml`：读取并保留 `config.yaml` 的注释与格式
 
 # 项目结构
 

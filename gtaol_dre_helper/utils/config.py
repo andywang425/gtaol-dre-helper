@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import yaml
+from ruamel.yaml import YAML
 from gtaol_dre_helper.models.config import AppConfig
 from gtaol_dre_helper.types import ProfileTypes, RegionDict, Resolution
 from gtaol_dre_helper.utils.paths import get_runtime_resource_path
@@ -37,38 +37,44 @@ def get_example_config_file_path() -> Path:
     return get_runtime_resource_path(EXAMPLE_CONFIG_FILE_NAME)
 
 
-def _replace_region_block(lines: list[str], region_name: str, values: RegionDict) -> None:
-    """替换模板内指定 region 块的默认值，同时保留原注释。"""
-    block_header = f"  {region_name}:"
-    for index, line in enumerate(lines):
-        if line.startswith(block_header):
-            lines[index + 1:index + 5] = [
-                f"    left: {values['left']}",
-                f"    top: {values['top']}",
-                f"    width: {values['width']}",
-                f"    height: {values['height']}",
-            ]
-            return
+def _replace_region_values(data: dict[str, object], regions: dict[ProfileTypes, RegionDict]) -> None:
+    """替换模板内 region 块的默认值"""
+    region_config = data.get("region")
+    assert isinstance(region_config, dict)
 
-    raise ValueError(f"默认模板缺少 region.{region_name} 配置块")
+    for profile_type, values in regions.items():
+        target_region = region_config.get(profile_type)
+        assert isinstance(target_region, dict)
+
+        for key, value in values.items():
+            target_region[key] = value
 
 
-def _build_initial_config_content(example_config_path: Path) -> str:
-    """生成首次写入的配置内容"""
+def _write_recommended_config(config_file_path: Path, example_config_path: Path) -> None:
+    """写入推荐的配置
+
+    Args:
+        config_file_path: 写入的配置文件路径
+        example_config_path: 参考的示例配置文件路径
+    """
+    yaml = YAML()
     content = example_config_path.read_text(encoding="utf-8")
     resolution = get_primary_screen_resolution()
     if resolution is None:
-        return content
+        config_file_path.write_text(content, encoding="utf-8")
+        return
 
     recommended_regions = REGION_PRESETS.get(resolution)
     if recommended_regions is None:
-        return content
+        config_file_path.write_text(content, encoding="utf-8")
+        return
 
-    lines = content.splitlines()
-    for region_name, values in recommended_regions.items():
-        _replace_region_block(lines, region_name, values)
+    data = yaml.load(content)
 
-    return "\n".join(lines)
+    _replace_region_values(data, recommended_regions)
+
+    with config_file_path.open("w", encoding="utf-8") as f:
+        yaml.dump(data, f)
 
 
 def get_or_create_config_file() -> Path:
@@ -90,18 +96,16 @@ def get_or_create_config_file() -> Path:
             f"请先在 {config_file_path.parent} 下放置 {EXAMPLE_CONFIG_FILE_NAME}"
         )
 
-    config_file_path.write_text(
-        _build_initial_config_content(example_config_path),
-        encoding="utf-8",
-    )
+    _write_recommended_config(config_file_path, example_config_path)
     return config_file_path
 
 
 def load_config() -> AppConfig:
     """从 yaml 文件加载配置"""
     config_file_path = get_or_create_config_file()
+    yaml = YAML()
 
     with config_file_path.open("r", encoding="utf-8") as f:
-        data = yaml.safe_load(f)
+        data = yaml.load(f)
 
     return AppConfig.model_validate(data)
