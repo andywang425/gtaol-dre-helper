@@ -47,8 +47,7 @@ class DreHelperApp(App):
         """打开 RegionLocator 辅助工具"""
         region_locator_path = get_region_locator_path()
         if not region_locator_path.exists():
-            self.notify(
-                "未找到 RegionLocator.exe", severity="error")
+            self.notify("未找到 RegionLocator.exe", severity="error")
             return
 
         try:
@@ -61,9 +60,9 @@ class DreHelperApp(App):
 
         try:
             get_or_create_config_file(always_create=True)
-            self.app.notify("已将配置重置为默认（重载后生效）")
+            self.notify("已将配置重置为默认（重载后生效）")
         except FileNotFoundError as e:
-            self.app.notify(f"重置配置失败: {e}", severity="error")
+            self.notify(f"重置配置失败: {e}", severity="error")
 
     @property
     def dashboard(self) -> DashboardScreen:

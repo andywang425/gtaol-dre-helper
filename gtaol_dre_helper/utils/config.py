@@ -14,15 +14,15 @@ EXAMPLE_CONFIG_FILE_NAME = "config.example.yaml"
 REGION_PRESETS: dict[Resolution, dict[ProfileTypes, RegionDict]] = {
     Resolution(3840, 2160): {
         "ceo": {"left": 3609, "top": 1974, "width": 172, "height": 55},
-        "single": {"left": 630, "top": 408, "width": 367, "height": 41},
+        "single": {"left": 633, "top": 408, "width": 367, "height": 55},
     },
     Resolution(2560, 1440): {
         "ceo": {"left": 2409, "top": 1314, "width": 105, "height": 37},
-        "single": {"left": 420, "top": 272, "width": 244, "height": 27},
+        "single": {"left": 424, "top": 275, "width": 241, "height": 29},
     },
     Resolution(1920, 1080): {
         "ceo": {"left": 1807, "top": 986, "width": 78, "height": 27},
-        "single": {"left": 315, "top": 204, "width": 183, "height": 20},
+        "single": {"left": 319, "top": 206, "width": 180, "height": 22},
     },
 }
 
