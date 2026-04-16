@@ -56,10 +56,10 @@ int main(void) {
   printf("GTAOL Dre Helper - 识别区域定位工具\n");
   printf("--------------------------------\n");
 
-  wait_space("请将鼠标移动到矩形识别区域左上角后按空格...", &left_top_x,
+  wait_space("请将鼠标移动到矩形识别区域左上角后按【空格】...", &left_top_x,
              &left_top_y);
-  wait_space("\n请将鼠标移动到矩形识别区域右下角后按空格...", &right_bottom_x,
-             &right_bottom_y);
+  wait_space("\n请将鼠标移动到矩形识别区域右下角后按【空格】...",
+             &right_bottom_x, &right_bottom_y);
 
   left = (left_top_x < right_bottom_x) ? left_top_x : right_bottom_x;
   top = (left_top_y < right_bottom_y) ? left_top_y : right_bottom_y;

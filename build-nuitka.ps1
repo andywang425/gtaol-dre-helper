@@ -49,6 +49,7 @@ Copy-Item -Path "tesseract" -Destination (Join-Path $packageDir "tesseract") -Re
 
 Write-Host "Building RegionLocator..."
 Compile-RegionLocator -OutputPath (Join-Path $packageDir "RegionLocator.exe")
+Copy-Item -Path (Join-Path $packageDir "RegionLocator.exe") -Destination . -Force
 
 Invoke-Create7ZipArchive -DistDir $distDir -ArchiveFileName $archiveFileName -SourcePath $packageDirName
 

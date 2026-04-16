@@ -222,3 +222,5 @@ tesseract/
 
 # Claude
 .claude/
+
+RegionLocator.exe
