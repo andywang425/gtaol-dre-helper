@@ -77,24 +77,24 @@ def _write_recommended_config(config_file_path: Path, example_config_path: Path)
         yaml.dump(data, f)
 
 
-def get_or_create_config_file() -> Path:
+def get_or_create_config_file(always_create: bool = False) -> Path:
     """获取或创建配置文件
 
     若配置文件不存在则根据示例配置文件自动生成默认配置
+
+    Args:
+        always_create: 是否强制创建配置文件
 
     Returns:
         配置文件路径
     """
     config_file_path = _get_config_file_path()
-    if config_file_path.exists():
+    if config_file_path.exists() and not always_create:
         return config_file_path
 
     example_config_path = get_example_config_file_path()
     if not example_config_path.exists():
-        raise FileNotFoundError(
-            "程序目录未找到配置文件 config.yaml，且缺少默认模板 config.example.yaml，"
-            f"请先在 {config_file_path.parent} 下放置 {EXAMPLE_CONFIG_FILE_NAME}"
-        )
+        raise FileNotFoundError(f"缺少示例配置文件 {EXAMPLE_CONFIG_FILE_NAME}")
 
     _write_recommended_config(config_file_path, example_config_path)
     return config_file_path

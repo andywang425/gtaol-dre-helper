@@ -2,6 +2,9 @@ from pathlib import Path
 import sys
 
 
+REGION_LOCATOR_EXE_NAME = "RegionLocator.exe"
+
+
 def _get_runtime_root() -> Path:
     """返回程序运行时的根目录
 
@@ -16,3 +19,8 @@ def _get_runtime_root() -> Path:
 def get_runtime_resource_path(*parts: str) -> Path:
     """基于运行时根目录拼接资源路径"""
     return _get_runtime_root().joinpath(*parts)
+
+
+def get_region_locator_path() -> Path:
+    """返回 RegionLocator 辅助工具路径"""
+    return get_runtime_resource_path(REGION_LOCATOR_EXE_NAME)

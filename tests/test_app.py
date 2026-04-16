@@ -5,7 +5,7 @@ from typing import cast
 import gtaol_dre_helper.app as app_module
 from gtaol_dre_helper.app import DreHelperApp
 from gtaol_dre_helper.utils.config import CONFIG_FILE_NAME, EXAMPLE_CONFIG_FILE_NAME
-from gtaol_dre_helper.utils.paths import get_runtime_resource_path
+from gtaol_dre_helper.utils.paths import REGION_LOCATOR_EXE_NAME, get_region_locator_path, get_runtime_resource_path
 
 
 def test_css_path_points_to_packaged_stylesheet() -> None:
@@ -27,10 +27,12 @@ def test_runtime_resource_paths_use_project_root_in_source_mode(monkeypatch) -> 
     config_path = get_runtime_resource_path(CONFIG_FILE_NAME)
     example_config_path = get_runtime_resource_path(EXAMPLE_CONFIG_FILE_NAME)
     tesseract_path = get_runtime_resource_path("tesseract", "tesseract.exe")
+    region_locator_path = get_region_locator_path()
 
     assert config_path == expected_root / CONFIG_FILE_NAME
     assert example_config_path == expected_root / EXAMPLE_CONFIG_FILE_NAME
     assert tesseract_path == expected_root / "tesseract" / "tesseract.exe"
+    assert region_locator_path == expected_root / REGION_LOCATOR_EXE_NAME
     assert example_config_path.exists()
 
 
@@ -43,7 +45,9 @@ def test_runtime_resource_paths_use_executable_directory_in_frozen_mode(monkeypa
     config_path = get_runtime_resource_path(CONFIG_FILE_NAME)
     example_config_path = get_runtime_resource_path(EXAMPLE_CONFIG_FILE_NAME)
     tesseract_path = get_runtime_resource_path("tesseract", "tesseract.exe")
+    region_locator_path = get_region_locator_path()
 
     assert config_path == tmp_path / "config.yaml"
     assert example_config_path == tmp_path / "config.example.yaml"
     assert tesseract_path == tmp_path / "tesseract" / "tesseract.exe"
+    assert region_locator_path == tmp_path / REGION_LOCATOR_EXE_NAME

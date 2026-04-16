@@ -1,15 +1,17 @@
 import os
 from pathlib import Path
-from typing import cast
+from typing import Iterable, cast
 
-from textual.app import App
+from textual.app import App, SystemCommand
 from textual.binding import Binding
 from textual.content import Content
+from textual.screen import Screen
 from gtaol_dre_helper.models.config import AppConfig, RuntimeProfile
 from gtaol_dre_helper.screens.dashboard import DashboardScreen
 from gtaol_dre_helper.utils.config import get_example_config_file_path, get_or_create_config_file, load_config
 from gtaol_dre_helper.services.monitor import MonitorService
 from gtaol_dre_helper.utils.logging import LogLevel, LogStyle, build_log_content
+from gtaol_dre_helper.utils.paths import get_region_locator_path
 
 
 class DreHelperApp(App):
@@ -36,6 +38,32 @@ class DreHelperApp(App):
 
     monitor_service: MonitorService | None = None
     config: AppConfig | None = None
+
+    def get_system_commands(self, screen: Screen) -> Iterable[SystemCommand]:
+        yield SystemCommand("Open RegionLocator", "启动用于定位OCR/颜色识别区域的辅助工具", self.open_region_locator)
+        yield SystemCommand("Reset Config", "重置配置为默认", self.reset_config)
+
+    def open_region_locator(self) -> None:
+        """打开 RegionLocator 辅助工具"""
+        region_locator_path = get_region_locator_path()
+        if not region_locator_path.exists():
+            self.notify(
+                "未找到 RegionLocator.exe", severity="error")
+            return
+
+        try:
+            os.startfile(region_locator_path)
+        except OSError as e:
+            self.notify(f"打开 RegionLocator 失败: {e}", severity="error")
+
+    def reset_config(self) -> None:
+        """重置配置"""
+
+        try:
+            get_or_create_config_file(always_create=True)
+            self.app.notify("已将配置重置为默认（重载后生效）")
+        except FileNotFoundError as e:
+            self.app.notify(f"重置配置失败: {e}", severity="error")
 
     @property
     def dashboard(self) -> DashboardScreen:
