@@ -178,7 +178,7 @@ wheels = [
 
 [[package]]
 name = "gtaol-dre-helper"
-version = "2.1.0"
+version = "2.2.0"
 source = { virtual = "." }
 dependencies = [
     { name = "mss" },

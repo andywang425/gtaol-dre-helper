@@ -1,6 +1,6 @@
 [project]
 name = "gtaol-dre-helper"
-version = "2.1.0"
+version = "2.2.0"
 requires-python = ">=3.14,<3.15"
 dependencies = [
   "pytesseract~=0.3.13",
