@@ -61,6 +61,8 @@ gtaol-dre-helper
    uv run python main.py
    ```
 
+   如果想测试 `Open RegionLocator` 命令，需要跑一次编译，否则程序会提示“未找到 `RegionLocator.exe`”。
+
 ### 开发调试
 
 建议先在 IDE 的终端中运行 `.\console` 打开 Textual 控制台，方便观察日志。

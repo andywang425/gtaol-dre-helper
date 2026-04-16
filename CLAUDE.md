@@ -28,6 +28,7 @@
 - `gtaol_dre_helper/services/monitor.py`：监控主循环核心
 - `gtaol_dre_helper/models/`：数据模型与校验
 - `gtaol_dre_helper/utils/`：OCR、截图、热键、输入、路径、配置等工具
+- `RegionLocator.c`：定位OCR/颜色识别区域的小工具
 - `tests/`：测试
 
 # 开发与验证
