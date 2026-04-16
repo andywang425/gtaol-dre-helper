@@ -2,12 +2,13 @@ from typing import cast
 from PIL import Image
 from mss.windows import MSS as mss
 
-from gtaol_dre_helper.types import ColorTuple, RegionDict
+from gtaol_dre_helper.types import ColorTuple, RegionDict, Resolution
 
 SINGLE_COLOR_TOLERANCE = 16
 SINGLE_COLOR_MIN_MATCH_RATIO = 0.88
 
-
+# Python MSS bug：mss实例只能在创建它的线程中使用
+# https://github.com/BoboTiG/python-mss/issues/273
 _mss_instance: mss | None = None
 
 
@@ -29,6 +30,20 @@ def clean_mss():
             print(f"关闭 mss 实例时出错: {e}")
         finally:
             _mss_instance = None
+
+
+def get_primary_screen_resolution() -> Resolution | None:
+    """返回主屏幕分辨率，获取失败时返回 None"""
+    with mss() as sct:
+        primary_monitor = sct.monitors[1]
+
+    width = primary_monitor.get("width")
+    height = primary_monitor.get("height")
+
+    if width is None or height is None:
+        return None
+
+    return Resolution(width, height)
 
 
 def get_screen_region_average_color(region: RegionDict) -> ColorTuple:

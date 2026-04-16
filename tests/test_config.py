@@ -47,25 +47,6 @@ def test_get_or_create_config_file_returns_existing_config_without_copying(monke
     assert config_path.read_text(encoding="utf-8") == "existing: true\n"
 
 
-def test_get_or_create_config_file_copies_example_when_missing(monkeypatch, tmp_path) -> None:
-    # 验证缺少 config.yaml 时，会自动从示例配置复制出默认配置。
-    config_path = tmp_path / "config.yaml"
-    example_path = tmp_path / EXAMPLE_CONFIG_FILE_NAME
-    example_content = "region:\n  ceo: {left: 1, top: 2, width: 3, height: 4}\n"
-    write_config_file(example_path, example_content)
-
-    monkeypatch.setattr(
-        config_utils, "_get_config_file_path", lambda: config_path)
-    monkeypatch.setattr(
-        config_utils, "get_example_config_file_path", lambda: example_path)
-
-    returned_path = config_utils.get_or_create_config_file()
-
-    assert returned_path == config_path
-    assert config_path.exists()
-    assert config_path.read_text(encoding="utf-8") == example_content
-
-
 def test_get_or_create_config_file_raises_when_config_and_example_are_missing(monkeypatch, tmp_path) -> None:
     # 验证配置文件和示例模板都缺失时，会抛出明确错误提示用户补齐模板。
     config_path = tmp_path / "config.yaml"

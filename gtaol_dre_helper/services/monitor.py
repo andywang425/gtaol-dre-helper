@@ -127,8 +127,6 @@ class MonitorService:
         except Exception as e:
             self.log("error", f"监控服务出错: {e}\n{traceback.format_exc()}")
         finally:
-            # Python MSS bug：mss实例只能在创建它的线程中使用
-            # https://github.com/BoboTiG/python-mss/issues/273
             clean_mss()
 
     def initialize_runtime(self) -> None:
