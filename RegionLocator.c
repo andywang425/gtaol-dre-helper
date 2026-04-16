@@ -21,19 +21,19 @@ static void get_cursor_position(LONG *x, LONG *y) {
   *y = 0;
 }
 
-static void wait_f12(const char *record_prompt, LONG *x, LONG *y) {
+static void wait_space(const char *record_prompt, LONG *x, LONG *y) {
   int was_pressed;
   int is_pressed;
 
   printf("%s\n", record_prompt);
-  was_pressed = is_vk_pressed(VK_F12);
+  was_pressed = is_vk_pressed(VK_SPACE);
 
   for (;;) {
     get_cursor_position(x, y);
     printf("\r当前坐标: X=%8ld, Y=%8ld", *x, *y);
     fflush(stdout);
 
-    is_pressed = is_vk_pressed(VK_F12);
+    is_pressed = is_vk_pressed(VK_SPACE);
     if (is_pressed && !was_pressed) {
       printf("\r已记录坐标: X=%ld, Y=%ld                \n", *x, *y);
       return;
@@ -56,10 +56,10 @@ int main(void) {
   printf("GTAOL Dre Helper - 识别区域定位工具\n");
   printf("--------------------------------\n");
 
-  wait_f12("请将鼠标移动到矩形识别区域左上角后按 F12...", &left_top_x,
-           &left_top_y);
-  wait_f12("\n请将鼠标移动到矩形识别区域右下角后按 F12...", &right_bottom_x,
-           &right_bottom_y);
+  wait_space("请将鼠标移动到矩形识别区域左上角后按空格...", &left_top_x,
+             &left_top_y);
+  wait_space("\n请将鼠标移动到矩形识别区域右下角后按空格...", &right_bottom_x,
+             &right_bottom_y);
 
   left = (left_top_x < right_bottom_x) ? left_top_x : right_bottom_x;
   top = (left_top_y < right_bottom_y) ? left_top_y : right_bottom_y;
