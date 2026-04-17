@@ -140,6 +140,46 @@ def test_poll_triggered_profile_key_only_triggers_when_combo_is_fully_pressed() 
     assert service.state.pressed_states["ctrl+f1"] is False
 
 
+def test_poll_triggered_profile_key_does_not_trigger_single_key_when_extra_modifier_is_pressed() -> None:
+    # 验证单键开关键在额外按下修饰键时不会被误判为触发。
+    pressed_codes = {17, 122}
+    service = MonitorService(
+        post_message=lambda _: True,
+        dependencies=MonitorDependencies(
+            is_vk_pressed=lambda vk_code: vk_code in pressed_codes,
+        ),
+    )
+    service.state.profiles = {
+        "f11": build_profile("方案 A", "f11", (122,)),
+    }
+    service.state.pressed_states = {"f11": False}
+
+    triggered_profile_key = service.poll_triggered_profile_key()
+
+    assert triggered_profile_key is None
+    assert service.state.pressed_states["f11"] is False
+
+
+def test_poll_triggered_profile_key_does_not_trigger_combo_when_extra_key_is_pressed() -> None:
+    # 验证组合开关键在额外按下其他支持的按键时不会被误判为触发。
+    pressed_codes = {17, 18, 123}
+    service = MonitorService(
+        post_message=lambda _: True,
+        dependencies=MonitorDependencies(
+            is_vk_pressed=lambda vk_code: vk_code in pressed_codes,
+        ),
+    )
+    service.state.profiles = {
+        "alt+f12": build_profile("方案 A", "alt+f12", (18, 123)),
+    }
+    service.state.pressed_states = {"alt+f12": False}
+
+    triggered_profile_key = service.poll_triggered_profile_key()
+
+    assert triggered_profile_key is None
+    assert service.state.pressed_states["alt+f12"] is False
+
+
 def test_run_ceo_monitor_cycle_executes_sequence_when_threshold_reached() -> None:
     # 验证 CEO 监控识别到满足人数阈值时，会执行当前方案动作序列并自动停止监控。
     messages: list[object] = []

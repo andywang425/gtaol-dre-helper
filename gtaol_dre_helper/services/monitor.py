@@ -8,6 +8,7 @@ from textual.message import Message
 from gtaol_dre_helper.models.config import AppConfig, RuntimeProfile
 from gtaol_dre_helper.utils.logging import LogLevel, LogStyle
 from gtaol_dre_helper.models.monitor import MonitorDependencies, MonitorState
+from gtaol_dre_helper.utils.hotkey import is_hotkey_combo_exactly_pressed
 from gtaol_dre_helper.utils.screen import clean_mss
 
 # 主循环间隔 (秒)
@@ -168,9 +169,9 @@ class MonitorService:
             触发的方案的key
         """
         for key, profile in self.state.profiles.items():
-            toggle_pressed = all(
-                self.is_vk_pressed_fn(vk_code)
-                for vk_code in profile.toggle_vk_codes
+            toggle_pressed = is_hotkey_combo_exactly_pressed(
+                profile.toggle_vk_codes,
+                is_vk_pressed_fn=self.is_vk_pressed_fn,
             )
             if toggle_pressed and not self.state.pressed_states[key]:
                 self.state.set_pressed(key, toggle_pressed)

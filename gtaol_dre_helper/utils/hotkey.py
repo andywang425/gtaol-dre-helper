@@ -1,4 +1,5 @@
 import ctypes
+from collections.abc import Callable
 from dataclasses import dataclass
 from ctypes import wintypes
 from typing import Optional
@@ -30,14 +31,22 @@ KEY_ALIASES = {
     "num_div": "numpad_div",
 }
 
+# MapVirtualKey 函数的映射类型参数，0 表示将虚拟键码转换为扫描码
 MAPVK_VK_TO_VSC = 0
+# SendInput 的标志，表示该按键属于扩展键
 KEYEVENTF_EXTENDEDKEY = 0x0001
+# 表示按键抬起事件
 KEYEVENTF_KEYUP = 0x0002
+# 表示使用硬件扫描码而不是虚拟键码来生成事件
 KEYEVENTF_SCANCODE = 0x0008
+# 获取 user32.dll 的句柄
 user32 = ctypes.windll.user32
+# MapVirtualKeyW 用于在虚拟键码和扫描码之间互相转换
+# 明确设置 MapVirtualKeyW 的参数类型和返回值类型，确保与 Windows API 一致
 user32.MapVirtualKeyW.argtypes = (wintypes.UINT, wintypes.UINT)
 user32.MapVirtualKeyW.restype = wintypes.UINT
 
+# 扩展键集合
 EXTENDED_KEYS = {
     "up",
     "down",
@@ -54,8 +63,8 @@ EXTENDED_KEYS = {
 }
 
 
-# Windows 虚拟键码映射
-VIRTUAL_KEY_CODES = {
+# Windows 虚拟键码映射（特殊按键）
+SPECIAL_VIRTUAL_KEY_CODES = {
     "backspace": 0x08,
     "tab": 0x09,
     "enter": 0x0D,
@@ -93,6 +102,13 @@ VIRTUAL_KEY_CODES = {
     "numpad_div": 0x6F,
 }
 
+SUPPORTED_TOGGLE_HOTKEY_VK_CODES = frozenset({
+    *SPECIAL_VIRTUAL_KEY_CODES.values(),
+    *(0x70 + function_index for function_index in range(24)),  # F1-F24
+    *(ord(character)
+      for character in "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"),  # 0-9 and A-Z
+})
+
 
 @dataclass(slots=True, frozen=True)
 class CompiledSendInputKey:
@@ -110,8 +126,8 @@ def _normalize_key_name(key: str) -> str:
 def get_virtual_key_code(key: str) -> Optional[int]:
     """将按键名称转换为对应的虚拟键码"""
     normalized_key = _normalize_key_name(key)
-    if normalized_key in VIRTUAL_KEY_CODES:
-        return VIRTUAL_KEY_CODES[normalized_key]
+    if normalized_key in SPECIAL_VIRTUAL_KEY_CODES:
+        return SPECIAL_VIRTUAL_KEY_CODES[normalized_key]
     if normalized_key.startswith("f") and normalized_key[1:].isdigit():
         function_index = int(normalized_key[1:])
         if 1 <= function_index <= 24:
@@ -171,6 +187,21 @@ def is_sendinput_supported_key(key: str) -> bool:
 def is_vk_pressed(vk_code: int) -> bool:
     """检查指定的按键是否当前被按下"""
     return (ctypes.windll.user32.GetAsyncKeyState(vk_code) & 0x8000) != 0
+
+
+def is_hotkey_combo_exactly_pressed(
+    expected_vk_codes: tuple[int, ...],
+    *,
+    is_vk_pressed_fn: Callable[[int], bool] = is_vk_pressed,
+) -> bool:
+    """检查当前按下的受支持热键是否与预期组合完全一致"""
+    expected_vk_code_set = set(expected_vk_codes)
+    pressed_vk_code_set = {
+        vk_code
+        for vk_code in SUPPORTED_TOGGLE_HOTKEY_VK_CODES
+        if is_vk_pressed_fn(vk_code)
+    }
+    return pressed_vk_code_set == expected_vk_code_set
 
 
 def parse_key_combo(value: str, *, field_name: str) -> tuple[str, ...]:

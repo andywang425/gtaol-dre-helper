@@ -9,6 +9,7 @@ SINGLE_COLOR_MIN_MATCH_RATIO = 0.88
 
 # Python MSS bug：mss实例只能在创建它的线程中使用
 # https://github.com/BoboTiG/python-mss/issues/273
+# 因此该实例目前仅在 MonitorService 线程中使用，并且结束线程时要清理该示例，在新线程中再创建
 _mss_instance: mss | None = None
 
 
