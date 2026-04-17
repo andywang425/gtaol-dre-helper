@@ -1,3 +1,4 @@
+from functools import cache
 from pathlib import Path
 import sys
 
@@ -5,6 +6,7 @@ import sys
 REGION_LOCATOR_EXE_NAME = "RegionLocator.exe"
 
 
+@cache
 def _get_runtime_root() -> Path:
     """返回程序运行时的根目录
 

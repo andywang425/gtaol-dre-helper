@@ -2,6 +2,7 @@ import ctypes
 from collections.abc import Callable
 from dataclasses import dataclass
 from ctypes import wintypes
+from functools import cache
 from typing import Optional
 
 
@@ -123,6 +124,7 @@ def _normalize_key_name(key: str) -> str:
     return KEY_ALIASES.get(key, key)
 
 
+@cache
 def get_virtual_key_code(key: str) -> Optional[int]:
     """将按键名称转换为对应的虚拟键码"""
     normalized_key = _normalize_key_name(key)
@@ -137,6 +139,7 @@ def get_virtual_key_code(key: str) -> Optional[int]:
     return None
 
 
+@cache
 def _get_scan_code(key: str) -> Optional[int]:
     """将按键名称转换为 SendInput 所需的扫描码"""
     vk_code = get_virtual_key_code(key)
@@ -149,6 +152,7 @@ def _get_scan_code(key: str) -> Optional[int]:
     return scan_code
 
 
+@cache
 def _compile_sendinput_key(key: str) -> Optional[CompiledSendInputKey]:
     """将按键名称预编译为可直接发送的运行时结构"""
     normalized_key = _normalize_key_name(key)

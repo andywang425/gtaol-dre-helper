@@ -5,7 +5,12 @@ from typing import cast
 import gtaol_dre_helper.app as app_module
 from gtaol_dre_helper.app import DreHelperApp
 from gtaol_dre_helper.utils.config import CONFIG_FILE_NAME, EXAMPLE_CONFIG_FILE_NAME
-from gtaol_dre_helper.utils.paths import REGION_LOCATOR_EXE_NAME, get_region_locator_path, get_runtime_resource_path
+from gtaol_dre_helper.utils.paths import (
+    REGION_LOCATOR_EXE_NAME,
+    _get_runtime_root,
+    get_region_locator_path,
+    get_runtime_resource_path,
+)
 
 
 def test_css_path_points_to_packaged_stylesheet() -> None:
@@ -21,6 +26,7 @@ def test_css_path_points_to_packaged_stylesheet() -> None:
 
 def test_runtime_resource_paths_use_project_root_in_source_mode(monkeypatch) -> None:
     # 验证源码运行时，配置文件模板与 Tesseract 都会相对项目根目录定位，而不是依赖当前工作目录。
+    _get_runtime_root.cache_clear()
     monkeypatch.delattr(sys, "frozen", raising=False)
     expected_root = Path(app_module.__file__).resolve().parents[1]
 
@@ -38,6 +44,7 @@ def test_runtime_resource_paths_use_project_root_in_source_mode(monkeypatch) -> 
 
 def test_runtime_resource_paths_use_executable_directory_in_frozen_mode(monkeypatch, tmp_path) -> None:
     # 验证打包后会相对 exe 所在目录查找配置与外部资源，避免从其他命令行目录启动时找不到文件。
+    _get_runtime_root.cache_clear()
     executable_path = tmp_path / "gtaol-dre-helper.exe"
     monkeypatch.setattr(sys, "frozen", True, raising=False)
     monkeypatch.setattr(sys, "executable", str(executable_path))
