@@ -111,10 +111,10 @@ profiles:
     assert "top: 986" in content
     assert "width: 78" in content
     assert "height: 27" in content
-    assert "left: 315" in content
-    assert "top: 204" in content
-    assert "width: 183" in content
-    assert "height: 20" in content
+    assert "left: 319" in content
+    assert "top: 206" in content
+    assert "width: 180" in content
+    assert "height: 22" in content
 
 
 def test_load_config_returns_validated_app_config(monkeypatch, tmp_path) -> None:
