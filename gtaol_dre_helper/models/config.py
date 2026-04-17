@@ -33,14 +33,14 @@ class ActionStep(BaseModel):
     @field_validator("key")
     @classmethod
     def validate_key(cls, value: str) -> str:
-        normalized_keys = parse_key_combo(value, field_name="动作按键")
+        normalized_keys = parse_key_combo(value)
         for key in normalized_keys:
             if not is_sendinput_supported_key(key):
                 raise ValueError(f"不支持的动作按键: {value}")
         return "+".join(normalized_keys)
 
     def to_runtime_action_step(self) -> RuntimeActionStep:
-        normalized_keys = parse_key_combo(self.key, field_name="动作按键")
+        normalized_keys = parse_key_combo(self.key)
 
         return RuntimeActionStep(
             keys=normalized_keys,
@@ -65,7 +65,7 @@ class ProfileConfig(BaseModel):
     @field_validator("toggle_key")
     @classmethod
     def validate_toggle_key(cls, value: str) -> str:
-        normalized_keys = parse_key_combo(value, field_name="监控开关键")
+        normalized_keys = parse_key_combo(value)
         if len(set(normalized_keys)) != len(normalized_keys):
             raise ValueError(f"监控开关键不能包含重复按键: {value}")
         for key in normalized_keys:
@@ -75,7 +75,7 @@ class ProfileConfig(BaseModel):
 
     @cached_property
     def toggle_keys(self) -> tuple[str, ...]:
-        return parse_key_combo(self.toggle_key, field_name="监控开关键")
+        return parse_key_combo(self.toggle_key)
 
     @property
     def toggle_vk_codes(self) -> tuple[int, ...]:

@@ -204,10 +204,10 @@ def is_hotkey_combo_exactly_pressed(
     return pressed_vk_code_set == expected_vk_code_set
 
 
-def parse_key_combo(value: str, *, field_name: str) -> tuple[str, ...]:
+def parse_key_combo(value: str) -> tuple[str, ...]:
     """将按键字符串解析为规范化后的按键序列"""
     if not value:
-        raise ValueError(f"{field_name}不能为空")
+        raise ValueError(f"按键不能为空")
 
     parts = tuple(part for part in value.split("+"))
     if any(len(part) == 0 for part in parts):
