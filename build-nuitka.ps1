@@ -46,6 +46,8 @@ Write-Host "Packaging application files..."
 Move-Item -Path $standaloneDir.FullName -Destination $packageDir -Force
 Copy-Item -Path "config.example.yaml" -Destination (Join-Path $packageDir "config.example.yaml") -Force
 Copy-Item -Path "tesseract" -Destination (Join-Path $packageDir "tesseract") -Recurse -Force
+$exampleConfigPath = Join-Path $packageDir "config.example.yaml"
+Set-ItemProperty -Path $exampleConfigPath -Name IsReadOnly -Value $true
 
 Write-Host "Building RegionLocator..."
 Compile-RegionLocator -OutputPath (Join-Path $packageDir "RegionLocator.exe")

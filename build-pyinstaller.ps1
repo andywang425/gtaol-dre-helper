@@ -38,6 +38,8 @@ New-Item -Path $packageDir -ItemType Directory -Force | Out-Null
 Move-Item -Path (Join-Path $distDir "$packageName.exe") -Destination $packageDir -Force
 Copy-Item -Path "config.example.yaml" -Destination (Join-Path $packageDir "config.example.yaml") -Force
 Copy-Item -Path "tesseract" -Destination (Join-Path $packageDir "tesseract") -Recurse -Force
+$exampleConfigPath = Join-Path $packageDir "config.example.yaml"
+Set-ItemProperty -Path $exampleConfigPath -Name IsReadOnly -Value $true
 
 Compile-RegionLocator -OutputPath (Join-Path $packageDir "RegionLocator.exe")
 Copy-Item -Path (Join-Path $packageDir "RegionLocator.exe") -Destination . -Force
